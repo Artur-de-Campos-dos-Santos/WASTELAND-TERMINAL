@@ -1,0 +1,144 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #000;
+  color: #33ff33;
+  font-family: "Share Tech Mono", "VT323", monospace;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#terminal {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  background: #0a0a0a;
+  overflow: hidden;
+  border: 8px solid #333;
+  border-radius: 8px;
+}
+
+#scanlines {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15) 0px,
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 10;
+}
+
+#screen {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 20px;
+  overflow-y: auto;
+  z-index: 5;
+}
+
+#screen::-webkit-scrollbar {
+  width: 6px;
+}
+
+#screen::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+#screen::-webkit-scrollbar-thumb {
+  background: #33ff33;
+  border-radius: 3px;
+}
+
+#output {
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  text-shadow: 0 0 5px rgba(51, 255, 51, 0.5);
+}
+
+.line {
+  margin-bottom: 2px;
+  opacity: 0;
+  animation: fadeIn 0.1s forwards;
+}
+
+.line.broadcast {
+  color: #4af626;
+}
+
+.line.system {
+  color: #2db82d;
+}
+
+.line.private {
+  color: #33ff33;
+}
+
+@keyframes fadeIn {
+  to {
+    opacity: 1;
+  }
+}
+
+/* CRT glow effect */
+#terminal::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(
+    ellipse at center,
+    transparent 60%,
+    rgba(0, 0, 0, 0.4) 100%
+  );
+  pointer-events: none;
+  z-index: 15;
+}
+
+/* Subtle flicker */
+@keyframes flicker {
+  0% { opacity: 0.97; }
+  5% { opacity: 0.95; }
+  10% { opacity: 0.97; }
+  15% { opacity: 0.94; }
+  20% { opacity: 0.98; }
+  25% { opacity: 0.96; }
+  30% { opacity: 0.97; }
+  35% { opacity: 0.95; }
+  40% { opacity: 0.98; }
+  45% { opacity: 0.96; }
+  50% { opacity: 0.97; }
+  55% { opacity: 0.94; }
+  60% { opacity: 0.98; }
+  65% { opacity: 0.96; }
+  70% { opacity: 0.97; }
+  75% { opacity: 0.95; }
+  80% { opacity: 0.98; }
+  85% { opacity: 0.96; }
+  90% { opacity: 0.97; }
+  95% { opacity: 0.94; }
+  100% { opacity: 0.98; }
+}
+
+#screen {
+  animation: flicker 8s infinite;
+}
+
+/* Removed message styling for cleared terminal */
+.line.removed {
+  color: #1a5c1a;
+  font-style: italic;
+}
