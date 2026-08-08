@@ -28,6 +28,7 @@ app.use("/api", require("./routes/messages"));
 app.use("/api", require("./routes/auth"));
 app.use("/api", require("./routes/session"));
 app.use("/api/export", require("./routes/export"));
+app.use("/api/quests", require("./routes/quests"));
 
 // Serve pages
 app.get("/player/:id", (req, res) => {
