@@ -39,6 +39,10 @@ app.get("/dm", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "dm", "index.html"));
 });
 
+app.get("/dm/quests", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "dm", "quests.html"));
+});
+
 // Socket.IO
 require("./sockets")(io, db);
 
