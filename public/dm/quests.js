@@ -44,7 +44,11 @@ async function updateQuest(id, data) {
   const updated = await api("PUT", `/quests/${id}`, data);
   const idx = quests.findIndex(q => q.id === id);
   if (idx !== -1) quests[idx] = updated;
-  renderQuestList();
+  // Only re-render quest list for status changes, not text edits
+  if ("status" in data) {
+    renderQuestList();
+  }
+  return updated;
 }
 
 async function deleteQuest(id) {
@@ -75,8 +79,11 @@ async function updateStage(questId, stageId, data) {
   const updated = await api("PUT", `/quests/${questId}/stages/${stageId}`, data);
   const idx = selectedQuestStages.findIndex(s => s.id === stageId);
   if (idx !== -1) selectedQuestStages[idx] = updated;
-  renderStages();
-  renderQuestList(); // Update status indicators if needed
+  // Only re-render for structural changes, not text edits
+  if ("is_done" in data || "sort_order" in data) {
+    renderStages();
+    renderQuestList();
+  }
   return updated;
 }
 
