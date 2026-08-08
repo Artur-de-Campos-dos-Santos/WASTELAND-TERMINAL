@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const { questQueries, questStageQueries, createMessage } = require("../db");
+const { MAX_MESSAGE_LENGTH } = require("../../config/config");
 
 function sanitize(str) {
   if (!str || typeof str !== "string") return "";
@@ -92,10 +93,15 @@ router.post("/:id/stages", (req, res) => {
     return res.status(400).json({ error: "Stage name is required" });
   }
 
+  const broadcastText = sanitize(broadcast_text) || null;
+  if (broadcastText && broadcastText.length > MAX_MESSAGE_LENGTH) {
+    return res.status(400).json({ error: `Broadcast text too long (max ${MAX_MESSAGE_LENGTH} characters)` });
+  }
+
   const maxSort = questStageQueries.getMaxSortOrder.get(id);
   const sortOrder = maxSort.max_sort + 1;
 
-  questStageQueries.create.run(id, cleanName, sanitize(broadcast_text) || null, sortOrder);
+  questStageQueries.create.run(id, cleanName, broadcastText, sortOrder);
   const stage = questStageQueries.getById.get(getLastId(req.app.locals.db));
   res.status(201).json(stage);
 });
@@ -117,6 +123,9 @@ router.put("/:id/stages/:stageId", (req, res) => {
   const broadcastText = req.body.broadcast_text !== undefined
     ? sanitize(req.body.broadcast_text) || null
     : stage.broadcast_text;
+  if (broadcastText && broadcastText.length > MAX_MESSAGE_LENGTH) {
+    return res.status(400).json({ error: `Broadcast text too long (max ${MAX_MESSAGE_LENGTH} characters)` });
+  }
   const sortOrder = typeof req.body.sort_order === "number" ? req.body.sort_order : stage.sort_order;
 
   let isDone = stage.is_done;
@@ -196,6 +205,13 @@ router.put("/:id/stages/reorder", (req, res) => {
   const { stageIds } = req.body;
   if (!Array.isArray(stageIds)) {
     return res.status(400).json({ error: "stageIds array is required" });
+  }
+
+  // Validate that all stageIds belong to this quest
+  const validStageIds = questStageQueries.getByQuest.all(id).map(s => s.id);
+  const invalidIds = stageIds.filter(sid => !validStageIds.includes(sid));
+  if (invalidIds.length > 0) {
+    return res.status(400).json({ error: "Some stages do not belong to this quest" });
   }
 
   const reorderTransaction = req.app.locals.db.transaction((ids) => {
