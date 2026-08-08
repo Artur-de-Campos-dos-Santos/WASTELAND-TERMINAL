@@ -42,6 +42,27 @@ function initDatabase() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (target_player_id) REFERENCES player(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS quest (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      name TEXT NOT NULL,
+      description TEXT,
+      status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'completed', 'failed')),
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+    );
+
+    CREATE TABLE IF NOT EXISTS quest_stage (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      quest_id INTEGER NOT NULL,
+      name TEXT NOT NULL,
+      broadcast_text TEXT,
+      sort_order INTEGER NOT NULL DEFAULT 0,
+      is_done INTEGER NOT NULL DEFAULT 0,
+      done_at DATETIME,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (quest_id) REFERENCES quest(id) ON DELETE CASCADE
+    );
   `);
 
   // Ensure at least one session exists
@@ -72,6 +93,30 @@ const messageQueries = {
   deleteForPlayer: null,
 };
 
+// --- Quest queries ---
+
+const questQueries = {
+  create: null,
+  getAll: null,
+  getById: null,
+  update: null,
+  delete: null,
+  getMaxSortOrder: null,
+};
+
+// --- Quest Stage queries ---
+
+const questStageQueries = {
+  create: null,
+  getByQuest: null,
+  getById: null,
+  update: null,
+  delete: null,
+  getMaxSortOrder: null,
+  countUndone: null,
+  reorder: null,
+};
+
 function prepareQueries(db) {
   playerQueries.create = db.prepare(
     "INSERT INTO player (id, display_name, pin) VALUES (?, ?, ?)"
@@ -95,6 +140,40 @@ function prepareQueries(db) {
   messageQueries.deleteForPlayer = db.prepare(
     "DELETE FROM message WHERE target_player_id = ?"
   );
+
+  // Quest queries
+  questQueries.create = db.prepare(
+    "INSERT INTO quest (name, description, sort_order) VALUES (?, ?, ?)"
+  );
+  questQueries.getAll = db.prepare("SELECT * FROM quest ORDER BY sort_order, created_at");
+  questQueries.getById = db.prepare("SELECT * FROM quest WHERE id = ?");
+  questQueries.update = db.prepare(
+    "UPDATE quest SET name = ?, description = ?, status = ? WHERE id = ?"
+  );
+  questQueries.delete = db.prepare("DELETE FROM quest WHERE id = ?");
+  questQueries.getMaxSortOrder = db.prepare("SELECT COALESCE(MAX(sort_order), 0) as max_sort FROM quest");
+
+  // Quest Stage queries
+  questStageQueries.create = db.prepare(
+    "INSERT INTO quest_stage (quest_id, name, broadcast_text, sort_order) VALUES (?, ?, ?, ?)"
+  );
+  questStageQueries.getByQuest = db.prepare(
+    "SELECT * FROM quest_stage WHERE quest_id = ? ORDER BY sort_order, created_at"
+  );
+  questStageQueries.getById = db.prepare("SELECT * FROM quest_stage WHERE id = ?");
+  questStageQueries.update = db.prepare(
+    "UPDATE quest_stage SET name = ?, broadcast_text = ?, is_done = ?, sort_order = ? WHERE id = ?"
+  );
+  questStageQueries.delete = db.prepare("DELETE FROM quest_stage WHERE id = ?");
+  questStageQueries.getMaxSortOrder = db.prepare(
+    "SELECT COALESCE(MAX(sort_order), 0) as max_sort FROM quest_stage WHERE quest_id = ?"
+  );
+  questStageQueries.countUndone = db.prepare(
+    "SELECT COUNT(*) as remaining FROM quest_stage WHERE quest_id = ? AND is_done = 0"
+  );
+  questStageQueries.reorder = db.prepare(
+    "UPDATE quest_stage SET sort_order = ? WHERE id = ?"
+  );
 }
 
 function createMessage(db, { targetType, targetPlayerId, body, source = "dm" }) {
@@ -107,4 +186,6 @@ module.exports = {
   createMessage,
   playerQueries,
   messageQueries,
+  questQueries,
+  questStageQueries,
 };
