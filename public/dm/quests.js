@@ -1,136 +1,136 @@
 // --- State ---
-let quests = [];
-let selectedQuestId = null;
-let selectedQuestStages = [];
-let dragState = null;
+var quests = [];
+var selectedQuestId = null;
+var selectedQuestStages = [];
 
 // --- Init ---
-document.addEventListener("DOMContentLoaded", () => {
+document.addEventListener("DOMContentLoaded", function() {
   loadQuests();
   setupEventListeners();
 });
 
 // --- API helpers ---
-async function api(method, path, body) {
-  const opts = {
-    method,
+function api(method, path, body) {
+  var opts = {
+    method: method,
     headers: { "Content-Type": "application/json" },
   };
   if (body) opts.body = JSON.stringify(body);
-  const res = await fetch(`/api${path}`, opts);
-  if (!res.ok) {
-    const err = await res.json().catch(() => ({ error: "Request failed" }));
-    throw new Error(err.error);
-  }
-  return res.json();
+  return fetch("/api" + path, opts).then(function(res) {
+    if (!res.ok) {
+      return res.json().catch(function() { return { error: "Request failed" }; }).then(function(err) {
+        throw new Error(err.error);
+      });
+    }
+    return res.json();
+  });
 }
 
 // --- Quest CRUD ---
-async function loadQuests() {
-  quests = await api("GET", "/quests");
-  renderQuestList();
-}
-
-async function createQuest() {
-  const name = prompt("Nome da missão:");
-  if (!name) return;
-  const quest = await api("POST", "/quests", { name });
-  quests.push(quest);
-  renderQuestList();
-  selectQuest(quest.id);
-}
-
-async function updateQuest(id, data) {
-  const updated = await api("PUT", `/quests/${id}`, data);
-  const idx = quests.findIndex(q => q.id === id);
-  if (idx !== -1) quests[idx] = updated;
-  // Only re-render quest list for status changes, not text edits
-  if ("status" in data) {
+function loadQuests() {
+  return api("GET", "/quests").then(function(data) {
+    quests = data;
     renderQuestList();
-  }
-  return updated;
+  });
 }
 
-async function deleteQuest(id) {
-  if (!confirm("Tem certeza que deseja excluir esta missão?")) return;
-  await api("DELETE", `/quests/${id}`);
-  quests = quests.filter(q => q.id !== id);
-  selectedQuestId = null;
-  renderQuestList();
-  renderQuestDetail();
+function createQuest() {
+  var name = prompt("Nome da missao:");
+  if (!name) return;
+  return api("POST", "/quests", { name: name }).then(function(quest) {
+    quests.push(quest);
+    renderQuestList();
+    selectQuest(quest.id);
+  });
+}
+
+function updateQuest(id, data) {
+  return api("PUT", "/quests/" + id, data).then(function(updated) {
+    var idx = quests.findIndex(function(q) { return q.id === id; });
+    if (idx !== -1) quests[idx] = updated;
+    if ("status" in data) {
+      renderQuestList();
+    }
+    return updated;
+  });
+}
+
+function deleteQuest(id) {
+  if (!confirm("Tem certeza que deseja excluir esta missao?")) return;
+  return api("DELETE", "/quests/" + id).then(function() {
+    quests = quests.filter(function(q) { return q.id !== id; });
+    selectedQuestId = null;
+    renderQuestList();
+    renderQuestDetail();
+  });
 }
 
 // --- Stage CRUD ---
-async function loadStages(questId) {
-  selectedQuestStages = await api("GET", `/quests/${questId}/stages`);
-  renderStages();
-}
-
-async function addStage(questId) {
-  const stage = await api("POST", `/quests/${questId}/stages`, { name: "Novo estágio" });
-  selectedQuestStages.push(stage);
-  renderStages();
-  // Focus the new stage name for editing
-  const nameInputs = document.querySelectorAll(".stage-name-input");
-  if (nameInputs.length) nameInputs[nameInputs.length - 1].focus();
-}
-
-async function updateStage(questId, stageId, data) {
-  const updated = await api("PUT", `/quests/${questId}/stages/${stageId}`, data);
-  const idx = selectedQuestStages.findIndex(s => s.id === stageId);
-  if (idx !== -1) selectedQuestStages[idx] = updated;
-  // Only re-render for structural changes, not text edits
-  if ("is_done" in data || "sort_order" in data) {
+function loadStages(questId) {
+  return api("GET", "/quests/" + questId + "/stages").then(function(data) {
+    selectedQuestStages = data;
     renderStages();
-    renderQuestList();
-  }
-  return updated;
+  });
 }
 
-async function deleteStage(questId, stageId) {
-  if (!confirm("Excluir este estágio?")) return;
-  await api("DELETE", `/quests/${questId}/stages/${stageId}`);
-  selectedQuestStages = selectedQuestStages.filter(s => s.id !== stageId);
-  renderStages();
+function addStage(questId) {
+  return api("POST", "/quests/" + questId + "/stages", { name: "Novo estagio" }).then(function(stage) {
+    selectedQuestStages.push(stage);
+    renderStages();
+    var nameInputs = document.querySelectorAll(".stage-name-input");
+    if (nameInputs.length) nameInputs[nameInputs.length - 1].focus();
+  });
 }
 
-async function reorderStages(questId, stageIds) {
-  await api("PUT", `/quests/${questId}/stages/reorder`, { stageIds });
-  await loadStages(questId);
+function updateStage(questId, stageId, data) {
+  return api("PUT", "/quests/" + questId + "/stages/" + stageId, data).then(function(updated) {
+    var idx = selectedQuestStages.findIndex(function(s) { return s.id === stageId; });
+    if (idx !== -1) selectedQuestStages[idx] = updated;
+    if ("is_done" in data) {
+      renderStages();
+      renderQuestList();
+    }
+    return updated;
+  });
+}
+
+function deleteStage(questId, stageId) {
+  if (!confirm("Excluir este estagio?")) return;
+  return api("DELETE", "/quests/" + questId + "/stages/" + stageId).then(function() {
+    selectedQuestStages = selectedQuestStages.filter(function(s) { return s.id !== stageId; });
+    renderStages();
+  });
 }
 
 // --- Rendering ---
 function renderQuestList() {
-  const container = document.getElementById("quest-list");
+  var container = document.getElementById("quest-list");
   if (!quests.length) {
-    container.innerHTML = '<p class="empty-text">Nenhuma missão ainda.</p>';
+    container.innerHTML = '<p class="empty-text">Nenhuma missao ainda.</p>';
     return;
   }
 
-  container.innerHTML = quests.map(q => {
-    const statusIcon = q.status === "active" ? "●"
-      : q.status === "completed" ? "✓" : "✗";
-    const statusClass = q.status === "completed" ? "completed"
+  container.innerHTML = quests.map(function(q) {
+    var statusIcon = q.status === "active" ? "\u25cf"
+      : q.status === "completed" ? "\u2713" : "\u2717";
+    var statusClass = q.status === "completed" ? "completed"
       : q.status === "failed" ? "failed" : "";
-    const activeClass = q.id === selectedQuestId ? "active" : "";
+    var activeClass = q.id === selectedQuestId ? "active" : "";
 
-    return `
-      <div class="quest-item ${activeClass}" data-id="${q.id}">
-        <span class="quest-status ${statusClass}">${statusIcon}</span>
-        <span class="quest-name">${escapeHtml(q.name)}</span>
-      </div>
-    `;
+    return '<div class="quest-item ' + activeClass + '" data-id="' + q.id + '">' +
+      '<span class="quest-status ' + statusClass + '">' + statusIcon + '</span>' +
+      '<span class="quest-name">' + escapeHtml(q.name) + '</span>' +
+      '</div>';
   }).join("");
 
-  // Attach click listeners
-  container.querySelectorAll(".quest-item").forEach(el => {
-    el.addEventListener("click", () => selectQuest(parseInt(el.dataset.id)));
+  container.querySelectorAll(".quest-item").forEach(function(el) {
+    el.addEventListener("click", function() { selectQuest(parseInt(el.dataset.id)); });
   });
 }
 
 function renderQuestDetail() {
-  const detail = document.getElementById("quest-detail");
-  const empty = document.getElementById("quest-empty");
+  var detail = document.getElementById("quest-detail");
+  var empty = document.getElementById("quest-empty");
 
   if (!selectedQuestId) {
     detail.classList.add("hidden");
@@ -141,7 +141,7 @@ function renderQuestDetail() {
   detail.classList.remove("hidden");
   empty.classList.add("hidden");
 
-  const quest = quests.find(q => q.id === selectedQuestId);
+  var quest = quests.find(function(q) { return q.id === selectedQuestId; });
   if (!quest) return;
 
   document.getElementById("quest-name").value = quest.name;
@@ -150,174 +150,121 @@ function renderQuestDetail() {
 }
 
 function renderStages() {
-  const container = document.getElementById("stages-list");
+  var container = document.getElementById("stages-list");
 
   if (!selectedQuestStages.length) {
-    container.innerHTML = '<p class="empty-text">Nenhum estágio. Adicione um!</p>';
+    container.innerHTML = '<p class="empty-text">Nenhum estagio. Adicione um!</p>';
     return;
   }
 
-  container.innerHTML = selectedQuestStages.map(stage => {
-    const doneClass = stage.is_done ? "done" : "";
-    const broadcastPreview = stage.broadcast_text
-      ? `<span class="broadcast-preview">${escapeHtml(stage.broadcast_text.substring(0, 40))}${stage.broadcast_text.length > 40 ? "..." : ""}</span>`
-      : '<span class="broadcast-preview none">(nenhum)</span>';
+  container.innerHTML = selectedQuestStages.map(function(stage) {
+    var doneClass = stage.is_done ? "done" : "";
+    var broadcastPreview;
+    if (stage.broadcast_text) {
+      var text = escapeHtml(stage.broadcast_text.substring(0, 40));
+      if (stage.broadcast_text.length > 40) text += "...";
+      broadcastPreview = '<span class="broadcast-preview">' + text + '</span>';
+    } else {
+      broadcastPreview = '<span class="broadcast-preview none">(nenhum)</span>';
+    }
 
-    return `
-      <div class="stage-row ${doneClass}" data-id="${stage.id}" draggable="true">
-        <span class="drag-handle" title="Arrastar para reordenar">⠿</span>
-        <button class="stage-end-btn ${stage.is_done ? "ended" : ""}" title="${stage.is_done ? "Desfazer" : "Finalizar estágio"}">${stage.is_done ? "DONE" : "END"}</button>
-        <input type="text" class="stage-name-input" value="${escapeHtml(stage.name)}" placeholder="Nome do estágio">
-        <div class="stage-broadcast">
-          <textarea class="stage-broadcast-input" placeholder="Texto do broadcast (opcional)">${escapeHtml(stage.broadcast_text || "")}</textarea>
-          ${broadcastPreview}
-        </div>
-        <button class="stage-delete-btn" title="Excluir estágio"><i class="fas fa-times"></i></button>
-      </div>
-    `;
+    var endLabel = stage.is_done ? "DONE" : "END";
+    var endTitle = stage.is_done ? "Desfazer" : "Finalizar estagio";
+    var endedClass = stage.is_done ? " ended" : "";
+
+    return '<div class="stage-row ' + doneClass + '" data-id="' + stage.id + '">' +
+      '<button class="stage-end-btn' + endedClass + '" title="' + endTitle + '">' + endLabel + '</button>' +
+      '<input type="text" class="stage-name-input" value="' + escapeHtml(stage.name) + '" placeholder="Nome do estagio">' +
+      '<div class="stage-broadcast">' +
+      '<textarea class="stage-broadcast-input" placeholder="Texto do broadcast (opcional)">' + escapeHtml(stage.broadcast_text || "") + '</textarea>' +
+      broadcastPreview +
+      '</div>' +
+      '<button class="stage-delete-btn" title="Excluir estagio"><i class="fas fa-times"></i></button>' +
+      '</div>';
   }).join("");
 
   attachStageListeners();
-  attachDragListeners();
 }
 
 function attachStageListeners() {
-  const questId = selectedQuestId;
+  var questId = selectedQuestId;
 
-  document.querySelectorAll(".stage-end-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const stageId = parseInt(e.target.closest(".stage-row").dataset.id);
-      const stage = selectedQuestStages.find(s => s.id === stageId);
-      const newDone = stage && stage.is_done ? 0 : 1;
+  document.querySelectorAll(".stage-end-btn").forEach(function(btn) {
+    btn.addEventListener("click", function(e) {
+      var stageId = parseInt(e.target.closest(".stage-row").dataset.id);
+      var stage = selectedQuestStages.find(function(s) { return s.id === stageId; });
+      var newDone = stage && stage.is_done ? 0 : 1;
       updateStage(questId, stageId, { is_done: newDone });
     });
   });
 
-  document.querySelectorAll(".stage-name-input").forEach(input => {
-    let debounce;
-    input.addEventListener("input", (e) => {
+  document.querySelectorAll(".stage-name-input").forEach(function(input) {
+    var debounce;
+    input.addEventListener("input", function(e) {
       clearTimeout(debounce);
-      debounce = setTimeout(() => {
-        const stageId = parseInt(e.target.closest(".stage-row").dataset.id);
+      debounce = setTimeout(function() {
+        var stageId = parseInt(e.target.closest(".stage-row").dataset.id);
         updateStage(questId, stageId, { name: e.target.value });
       }, 500);
     });
   });
 
-  document.querySelectorAll(".stage-broadcast-input").forEach(textarea => {
-    let debounce;
-    textarea.addEventListener("input", (e) => {
+  document.querySelectorAll(".stage-broadcast-input").forEach(function(textarea) {
+    var debounce;
+    textarea.addEventListener("input", function(e) {
       clearTimeout(debounce);
-      debounce = setTimeout(() => {
-        const stageId = parseInt(e.target.closest(".stage-row").dataset.id);
+      debounce = setTimeout(function() {
+        var stageId = parseInt(e.target.closest(".stage-row").dataset.id);
         updateStage(questId, stageId, { broadcast_text: e.target.value });
       }, 500);
     });
-    textarea.addEventListener("blur", (e) => {
-      const container = e.target.closest(".stage-broadcast");
-      const preview = container.querySelector(".broadcast-preview");
+    textarea.addEventListener("blur", function(e) {
+      var container = e.target.closest(".stage-broadcast");
+      var preview = container.querySelector(".broadcast-preview");
       e.target.classList.remove("visible");
       preview.classList.remove("hidden");
     });
   });
 
-  document.querySelectorAll(".broadcast-preview").forEach(preview => {
-    preview.addEventListener("click", (e) => {
-      const container = e.target.closest(".stage-broadcast");
-      const textarea = container.querySelector(".stage-broadcast-input");
+  document.querySelectorAll(".broadcast-preview").forEach(function(preview) {
+    preview.addEventListener("click", function(e) {
+      var container = e.target.closest(".stage-broadcast");
+      var textarea = container.querySelector(".stage-broadcast-input");
       preview.classList.add("hidden");
       textarea.classList.add("visible");
       textarea.focus();
     });
   });
 
-  document.querySelectorAll(".stage-delete-btn").forEach(btn => {
-    btn.addEventListener("click", (e) => {
-      const stageId = parseInt(e.target.closest(".stage-row").dataset.id);
+  document.querySelectorAll(".stage-delete-btn").forEach(function(btn) {
+    btn.addEventListener("click", function(e) {
+      var stageId = parseInt(e.target.closest(".stage-row").dataset.id);
       deleteStage(questId, stageId);
     });
   });
-}
-
-// --- Drag and Drop ---
-function attachDragListeners() {
-  const rows = document.querySelectorAll(".stage-row");
-  rows.forEach(row => {
-    row.addEventListener("dragstart", handleDragStart);
-    row.addEventListener("dragover", handleDragOver);
-    row.addEventListener("dragend", handleDragEnd);
-    row.addEventListener("drop", handleDrop);
-  });
-}
-
-function handleDragStart(e) {
-  dragState = { draggedId: parseInt(e.target.dataset.id) };
-  e.target.classList.add("dragging");
-  e.dataTransfer.effectAllowed = "move";
-}
-
-function handleDragOver(e) {
-  e.preventDefault();
-  e.dataTransfer.dropEffect = "move";
-  const row = e.target.closest(".stage-row");
-  if (row && parseInt(row.dataset.id) !== dragState.draggedId) {
-    row.classList.add("drag-over");
-  }
-}
-
-function handleDragEnd(e) {
-  document.querySelectorAll(".stage-row").forEach(r => {
-    r.classList.remove("dragging", "drag-over");
-  });
-  dragState = null;
-}
-
-function handleDrop(e) {
-  e.preventDefault();
-  const targetRow = e.target.closest(".stage-row");
-  if (!targetRow || !dragState) return;
-
-  const targetId = parseInt(targetRow.dataset.id);
-  const draggedId = dragState.draggedId;
-  if (targetId === draggedId) return;
-
-  // Build new order
-  const stageIds = selectedQuestStages.map(s => s.id);
-  const fromIdx = stageIds.indexOf(draggedId);
-  const toIdx = stageIds.indexOf(targetId);
-
-  stageIds.splice(fromIdx, 1);
-  stageIds.splice(toIdx, 0, draggedId);
-
-  // Optimistic reorder
-  selectedQuestStages = stageIds.map(id => selectedQuestStages.find(s => s.id === id));
-  renderStages();
-
-  // Persist
-  reorderStages(selectedQuestId, stageIds);
 }
 
 // --- Event Listeners ---
 function setupEventListeners() {
   document.getElementById("btn-new-quest").addEventListener("click", createQuest);
 
-  document.getElementById("btn-add-stage").addEventListener("click", () => {
+  document.getElementById("btn-add-stage").addEventListener("click", function() {
     if (selectedQuestId) addStage(selectedQuestId);
   });
 
-  document.getElementById("quest-name").addEventListener("change", (e) => {
+  document.getElementById("quest-name").addEventListener("change", function(e) {
     if (selectedQuestId) updateQuest(selectedQuestId, { name: e.target.value });
   });
 
-  document.getElementById("quest-description").addEventListener("change", (e) => {
+  document.getElementById("quest-description").addEventListener("change", function(e) {
     if (selectedQuestId) updateQuest(selectedQuestId, { description: e.target.value });
   });
 
-  document.getElementById("quest-status").addEventListener("change", (e) => {
+  document.getElementById("quest-status").addEventListener("change", function(e) {
     if (selectedQuestId) updateQuest(selectedQuestId, { status: e.target.value });
   });
 
-  document.getElementById("btn-delete-quest").addEventListener("click", () => {
+  document.getElementById("btn-delete-quest").addEventListener("click", function() {
     if (selectedQuestId) deleteQuest(selectedQuestId);
   });
 }
@@ -331,7 +278,7 @@ function selectQuest(id) {
 
 // --- Helpers ---
 function escapeHtml(str) {
-  const div = document.createElement("div");
+  var div = document.createElement("div");
   div.textContent = str || "";
   return div.innerHTML;
 }

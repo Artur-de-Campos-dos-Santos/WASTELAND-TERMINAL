@@ -143,35 +143,31 @@ router.put("/:id/stages/:stageId", (req, res) => {
   questStageQueries.update.run(name, broadcastText, isDone, doneAt, sortOrder, stageId);
   const updated = questStageQueries.getById.get(stageId);
 
-  // Check if this was the last undone stage and broadcast_text exists
+  // Broadcast immediately when a stage with broadcast_text is marked done
   if (isDone === 1 && updated.broadcast_text) {
-    const remaining = questStageQueries.countUndone.get(id);
-    if (remaining.remaining === 0) {
-      const io = req.app.locals.io;
-      const db = req.app.locals.db;
-      const messageBody = updated.broadcast_text;
+    const io = req.app.locals.io;
+    const db = req.app.locals.db;
 
-      const result = createMessage(db, {
-        targetType: "broadcast",
-        targetPlayerId: null,
-        body: messageBody,
-        source: "auto",
-      });
+    const result = createMessage(db, {
+      targetType: "broadcast",
+      targetPlayerId: null,
+      body: updated.broadcast_text,
+      source: "auto",
+    });
 
-      const message = {
-        id: result.lastInsertRowid,
-        target_type: "broadcast",
-        target_player_id: null,
-        body: messageBody,
-        source: "auto",
-        created_at: new Date().toISOString(),
-      };
+    const message = {
+      id: result.lastInsertRowid,
+      target_type: "broadcast",
+      target_player_id: null,
+      body: updated.broadcast_text,
+      source: "auto",
+      created_at: new Date().toISOString(),
+    };
 
-      io.emit("message:new", message);
-      io.to("admin").emit("message:new", message);
+    io.emit("message:new", message);
+    io.to("admin").emit("message:new", message);
 
-      updated._broadcastSent = true;
-    }
+    updated._broadcastSent = true;
   }
 
   res.json(updated);

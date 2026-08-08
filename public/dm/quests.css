@@ -346,28 +346,6 @@ header h1 {
   color: #1a5c1a;
 }
 
-.stage-row.dragging {
-  opacity: 0.4;
-  border-color: #33ff33;
-  box-shadow: 0 0 15px rgba(51, 255, 51, 0.3);
-}
-
-.stage-row.drag-over {
-  border-top: 2px solid #33ff33;
-}
-
-.drag-handle {
-  cursor: grab;
-  color: #1a5c1a;
-  font-size: 1rem;
-  user-select: none;
-  transition: color 0.2s;
-}
-
-.drag-handle:hover {
-  color: #33ff33;
-}
-
 .stage-end-btn {
   padding: 4px 10px;
   font-family: inherit;
