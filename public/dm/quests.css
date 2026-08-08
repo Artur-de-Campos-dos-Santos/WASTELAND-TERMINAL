@@ -410,13 +410,18 @@ header h1 {
   padding: 4px 8px;
   font-family: inherit;
   font-size: 0.75rem;
-  background: transparent;
-  border: 1px solid transparent;
-  color: #2db82d;
+  background: #0a0a0a;
+  border: 1px solid #1a3d1a;
+  color: #33ff33;
   outline: none;
   resize: none;
   min-height: 24px;
-  transition: all 0.2s;
+  display: none;
+  transition: border-color 0.2s;
+}
+
+.stage-broadcast-input.visible {
+  display: block;
 }
 
 .stage-broadcast-input:focus {
@@ -429,23 +434,23 @@ header h1 {
 }
 
 .broadcast-preview {
-  display: none;
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  background: #111;
-  border: 1px solid #33ff33;
-  padding: 6px 10px;
+  display: block;
+  padding: 4px 8px;
   font-size: 0.75rem;
   color: #2db82d;
   max-width: 300px;
   word-wrap: break-word;
-  z-index: 10;
-  margin-bottom: 4px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border-color 0.2s;
 }
 
-.stage-broadcast:hover .broadcast-preview {
-  display: block;
+.broadcast-preview:hover {
+  border-color: #1a3d1a;
+}
+
+.broadcast-preview.hidden {
+  display: none;
 }
 
 .broadcast-preview.none {

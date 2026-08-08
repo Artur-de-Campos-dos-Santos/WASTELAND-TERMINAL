@@ -204,6 +204,22 @@ function attachStageListeners() {
         updateStage(questId, stageId, { broadcast_text: e.target.value });
       }, 500);
     });
+    textarea.addEventListener("blur", (e) => {
+      const container = e.target.closest(".stage-broadcast");
+      const preview = container.querySelector(".broadcast-preview");
+      e.target.classList.remove("visible");
+      preview.classList.remove("hidden");
+    });
+  });
+
+  document.querySelectorAll(".broadcast-preview").forEach(preview => {
+    preview.addEventListener("click", (e) => {
+      const container = e.target.closest(".stage-broadcast");
+      const textarea = container.querySelector(".stage-broadcast-input");
+      preview.classList.add("hidden");
+      textarea.classList.add("visible");
+      textarea.focus();
+    });
   });
 
   document.querySelectorAll(".stage-delete-btn").forEach(btn => {
