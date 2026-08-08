@@ -604,4 +604,10 @@ function updatePlayerStatuses(data) {
   // Placeholder for real connection tracking
 }
 
+// ==================== QUEST JOURNAL ====================
+
+document.getElementById("btn-quest-journal").addEventListener("click", () => {
+  window.location.href = "/dm/quests";
+});
+
 init();
