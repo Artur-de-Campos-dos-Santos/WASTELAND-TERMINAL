@@ -166,7 +166,7 @@ function renderStages() {
     return `
       <div class="stage-row ${doneClass}" data-id="${stage.id}" draggable="true">
         <span class="drag-handle" title="Arrastar para reordenar">⠿</span>
-        <input type="checkbox" class="stage-checkbox" ${stage.is_done ? "checked" : ""}>
+        <button class="stage-end-btn ${stage.is_done ? "ended" : ""}" title="${stage.is_done ? "Desfazer" : "Finalizar estágio"}">${stage.is_done ? "DONE" : "END"}</button>
         <input type="text" class="stage-name-input" value="${escapeHtml(stage.name)}" placeholder="Nome do estágio">
         <div class="stage-broadcast">
           <textarea class="stage-broadcast-input" placeholder="Texto do broadcast (opcional)">${escapeHtml(stage.broadcast_text || "")}</textarea>
@@ -184,10 +184,12 @@ function renderStages() {
 function attachStageListeners() {
   const questId = selectedQuestId;
 
-  document.querySelectorAll(".stage-checkbox").forEach(cb => {
-    cb.addEventListener("change", (e) => {
+  document.querySelectorAll(".stage-end-btn").forEach(btn => {
+    btn.addEventListener("click", (e) => {
       const stageId = parseInt(e.target.closest(".stage-row").dataset.id);
-      updateStage(questId, stageId, { is_done: e.target.checked ? 1 : 0 });
+      const stage = selectedQuestStages.find(s => s.id === stageId);
+      const newDone = stage && stage.is_done ? 0 : 1;
+      updateStage(questId, stageId, { is_done: newDone });
     });
   });
 

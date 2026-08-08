@@ -368,12 +368,34 @@ header h1 {
   color: #33ff33;
 }
 
-.stage-checkbox {
-  width: 16px;
-  height: 16px;
-  accent-color: #33ff33;
+.stage-end-btn {
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  background: transparent;
+  color: #33ff33;
+  border: 1px solid #33ff33;
   cursor: pointer;
   flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.stage-end-btn:hover {
+  background: rgba(51, 255, 51, 0.15);
+  box-shadow: 0 0 8px rgba(51, 255, 51, 0.3);
+}
+
+.stage-end-btn.ended {
+  color: #1a5c1a;
+  border-color: #1a5c1a;
+}
+
+.stage-end-btn.ended:hover {
+  color: #33ff33;
+  border-color: #33ff33;
+  background: rgba(51, 255, 51, 0.1);
 }
 
 .stage-name-input {
