@@ -1,0 +1,20 @@
+{
+  "name": "wasteland-terminal",
+  "version": "1.0.0",
+  "description": "Fallout Pip-Boy styled terminal for TTRPG sessions",
+  "main": "server/server.js",
+  "scripts": {
+    "start": "node server/server.js",
+    "dev": "node --watch server/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "archiver": "^8.0.0",
+    "better-sqlite3": "^13.0.3",
+    "express": "^5.2.1",
+    "socket.io": "^4.8.3"
+  }
+}

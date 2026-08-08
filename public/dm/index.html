@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WASTELAND TERMINAL // MESTRE</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+  <div id="auth-screen" class="hidden">
+    <h1>WASTELAND TERMINAL</h1>
+    <p>Insira o PIN do mestre:</p>
+    <input type="password" id="pin-input" maxlength="10" autofocus>
+    <button id="pin-submit">AUTORIZAR</button>
+    <p id="pin-error" class="error hidden">PIN INVÁLIDO</p>
+  </div>
+
+  <div id="dashboard" class="hidden">
+    <header>
+      <h1>WASTELAND TERMINAL // MESTRE</h1>
+      <div class="header-actions">
+        <button id="btn-export-combined">EXPORTAR COMBINADO</button>
+        <button id="btn-export-all">EXPORTAR TUDO</button>
+        <button id="btn-clear-log" class="danger">LIMPAR LOG</button>
+      </div>
+    </header>
+
+    <section id="add-player">
+      <h2>ADICIONAR JOGADOR</h2>
+      <div class="add-player-form">
+        <input type="text" id="new-player-name" placeholder="Nome do jogador" maxlength="100">
+        <button id="btn-add-player">ADICIONAR</button>
+      </div>
+    </section>
+
+    <section id="players-section">
+      <h2>JOGADORES</h2>
+      <div id="players-list"></div>
+    </section>
+
+    <section id="broadcast-section">
+      <h2>TRANSMITIR</h2>
+      <div class="send-form">
+        <textarea id="broadcast-input" placeholder="Digite uma mensagem para todos os jogadores..." maxlength="2000"></textarea>
+        <button id="btn-broadcast">ENVIAR A TODOS</button>
+      </div>
+    </section>
+
+    <section id="presets-section">
+      <h2>PRESETES</h2>
+      <div id="presets-grid" class="presets-grid"></div>
+      <div id="preset-form" class="preset-form hidden"></div>
+    </section>
+
+    <section id="god-view-section">
+      <h2>FEED COMBINADO</h2>
+      <div id="god-view"></div>
+    </section>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="dashboard.js"></script>
+</body>
+</html>
