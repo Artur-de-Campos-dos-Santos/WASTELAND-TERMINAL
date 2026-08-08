@@ -131,7 +131,7 @@ router.put("/:id/stages/:stageId", (req, res) => {
     }
   }
 
-  questStageQueries.update.run(name, broadcastText, isDone, sortOrder, stageId);
+  questStageQueries.update.run(name, broadcastText, isDone, doneAt, sortOrder, stageId);
   const updated = questStageQueries.getById.get(stageId);
 
   // Check if this was the last undone stage and broadcast_text exists

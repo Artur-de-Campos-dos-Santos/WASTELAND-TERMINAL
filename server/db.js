@@ -162,7 +162,7 @@ function prepareQueries(db) {
   );
   questStageQueries.getById = db.prepare("SELECT * FROM quest_stage WHERE id = ?");
   questStageQueries.update = db.prepare(
-    "UPDATE quest_stage SET name = ?, broadcast_text = ?, is_done = ?, sort_order = ? WHERE id = ?"
+    "UPDATE quest_stage SET name = ?, broadcast_text = ?, is_done = ?, done_at = ?, sort_order = ? WHERE id = ?"
   );
   questStageQueries.delete = db.prepare("DELETE FROM quest_stage WHERE id = ?");
   questStageQueries.getMaxSortOrder = db.prepare(
