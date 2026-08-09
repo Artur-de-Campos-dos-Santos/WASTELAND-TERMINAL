@@ -11,6 +11,16 @@ Um sistema de log de sessão para RPG de mesa inspirado nos terminais do **Fallo
 - **Exportação de logs** — download do transcript combinado ou individual por jogador em `.txt`, ou tudo junto em `.zip`
 - **Proteção por PIN** — PIN opcional para acessar o dashboard do mestre
 - **Backup automático** — banco de dados copiado na inicialização do servidor
+- **Sistema de temas** — 4 visuais trocáveis em tempo real (Pip-Boy, Old Paper, Cave Writings, Noir Detective)
+
+## Implementação
+
+Este projeto usa **subagent-driven development** para implementação de features. Cada feature é planejada em um spec detalhado, depois executada tarefa por tarefa com subagentes.
+
+Specs e planos ficam em:
+- `docs/superpowers/specs/` — design specs
+- `docs/superpowers/plans/` — planos de implementação
+- `THEMES.md` — spec completo do sistema de temas
 
 ## Como usar
 
@@ -49,15 +59,23 @@ Um sistema de log de sessão para RPG de mesa inspirado nos terminais do **Fallo
     auth.js          # Autenticação do mestre
     session.js       # Reset de sessão
     export.js        # Exportação de transcripts
+    config.js        # Configurações (tema)
+    quests.js        # CRUD de missões e estágios
 /config
   config.js          # Configurações (PIN, porta, etc)
 /public
   /player            # Terminal do jogador
-  /dm                # Dashboard do mestre
+  /dm                # Dashboard do mestre + diário de missões
+  /images            # Texturas para temas
   favicon.svg        # Ícone do terminal
 /data
   session.sqlite     # Banco de dados
   /backup            # Backups automáticos
+/docs
+  /superpowers
+    /specs           # Design specs
+    /plans           # Planos de implementação
+THEMES.md            # Spec do sistema de temas
 ```
 
 ## Tecnologias
