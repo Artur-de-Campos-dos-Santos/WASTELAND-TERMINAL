@@ -171,6 +171,25 @@ header h1 {
   box-shadow: var(--glow);
 }
 
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#theme-select {
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-family: var(--font-main);
+  padding: 8px;
+}
+
+#theme-select:focus {
+  outline: 1px solid var(--accent);
+  border-color: var(--accent);
+}
+
 /* ==================== TWO-PANEL LAYOUT ==================== */
 
 .quest-layout {

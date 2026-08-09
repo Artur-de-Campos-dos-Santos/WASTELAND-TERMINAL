@@ -248,6 +248,19 @@ header h1 {
   box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
 }
 
+#theme-select {
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-family: var(--font-main);
+  padding: 8px;
+}
+
+#theme-select:focus {
+  outline: 1px solid var(--accent);
+  border-color: var(--accent);
+}
+
 /* Sections */
 section {
   margin-bottom: 30px;
