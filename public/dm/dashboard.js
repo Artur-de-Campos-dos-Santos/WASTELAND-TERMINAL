@@ -18,6 +18,7 @@ const clearLogBtn = document.getElementById("btn-clear-log");
 const godView = document.getElementById("god-view");
 const presetsGrid = document.getElementById("presets-grid");
 const presetForm = document.getElementById("preset-form");
+let currentTheme = "pipboy";
 
 const socket = io();
 
@@ -339,6 +340,16 @@ async function init() {
     authenticated = true;
     showDashboard();
   }
+
+  // Load current theme
+  fetch("/api/config/theme")
+    .then(r => r.json())
+    .then(data => {
+      currentTheme = data.theme;
+      document.body.className = "theme-" + currentTheme;
+      const sel = document.getElementById("theme-select");
+      if (sel) sel.value = currentTheme;
+    });
 }
 
 pinSubmit.addEventListener("click", submitPin);
@@ -611,3 +622,23 @@ document.getElementById("btn-quest-journal").addEventListener("click", () => {
 });
 
 init();
+
+// ==================== THEMES ====================
+
+// Theme switcher
+document.getElementById("theme-select").addEventListener("change", (e) => {
+  const theme = e.target.value;
+  fetch("/api/config/theme", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ theme })
+  });
+});
+
+// Listen for theme changes from server
+socket.on("theme:changed", (data) => {
+  currentTheme = data.theme;
+  document.body.className = "theme-" + currentTheme;
+  const sel = document.getElementById("theme-select");
+  if (sel) sel.value = currentTheme;
+});
