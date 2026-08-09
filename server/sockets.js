@@ -1,4 +1,9 @@
-const { playerQueries } = require("./db");
+const { playerQueries, configQueries } = require("./db");
+
+function emitTheme(socket) {
+  const themeRow = configQueries.get.get("theme");
+  socket.emit("theme:changed", { theme: themeRow ? themeRow.value : "pipboy" });
+}
 
 module.exports = function setupSockets(io, db) {
   io.on("connection", (socket) => {
@@ -8,6 +13,7 @@ module.exports = function setupSockets(io, db) {
       if (room === "admin") {
         socket.join("admin");
         console.log(`Socket ${socket.id} joined admin room`);
+        emitTheme(socket);
         return;
       }
 
@@ -23,6 +29,7 @@ module.exports = function setupSockets(io, db) {
         socket.join(room);
         socket.data.playerId = playerId;
         console.log(`[SOCK] Socket ${socket.id} joined room ${room} (player: ${player.display_name})`);
+        emitTheme(socket);
       }
     });
 

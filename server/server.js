@@ -29,6 +29,7 @@ app.use("/api", require("./routes/auth"));
 app.use("/api", require("./routes/session"));
 app.use("/api/export", require("./routes/export"));
 app.use("/api/quests", require("./routes/quests"));
+app.use("/api/config", require("./routes/config"));
 
 // Serve pages
 app.get("/player/:id", (req, res) => {
