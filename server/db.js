@@ -63,12 +63,23 @@ function initDatabase() {
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (quest_id) REFERENCES quest(id) ON DELETE CASCADE
     );
+
+    CREATE TABLE IF NOT EXISTS config (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
   `);
 
   // Ensure at least one session exists
   const session = db.prepare("SELECT id FROM session LIMIT 1").get();
   if (!session) {
     db.prepare("INSERT INTO session (created_at) VALUES (CURRENT_TIMESTAMP)").run();
+  }
+
+  // Set default theme
+  const existingTheme = db.prepare("SELECT value FROM config WHERE key = ?").get("theme");
+  if (!existingTheme) {
+    db.prepare("INSERT INTO config (key, value) VALUES (?, ?)").run("theme", "pipboy");
   }
 
   return db;
@@ -115,6 +126,13 @@ const questStageQueries = {
   getMaxSortOrder: null,
   countUndone: null,
   reorder: null,
+};
+
+// --- Config queries ---
+
+const configQueries = {
+  get: null,
+  set: null,
 };
 
 function prepareQueries(db) {
@@ -174,6 +192,12 @@ function prepareQueries(db) {
   questStageQueries.reorder = db.prepare(
     "UPDATE quest_stage SET sort_order = ? WHERE id = ?"
   );
+
+  // Config queries
+  configQueries.get = db.prepare("SELECT value FROM config WHERE key = ?");
+  configQueries.set = db.prepare(
+    "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)"
+  );
 }
 
 function createMessage(db, { targetType, targetPlayerId, body, source = "dm" }) {
@@ -188,4 +212,5 @@ module.exports = {
   messageQueries,
   questQueries,
   questStageQueries,
+  configQueries,
 };
