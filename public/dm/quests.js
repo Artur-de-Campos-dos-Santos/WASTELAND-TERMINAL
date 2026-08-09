@@ -2,11 +2,31 @@
 var quests = [];
 var selectedQuestId = null;
 var selectedQuestStages = [];
+var currentTheme = "pipboy";
+
+var socket = io();
 
 // --- Init ---
 document.addEventListener("DOMContentLoaded", function() {
   loadQuests();
   setupEventListeners();
+
+  // Load theme
+  fetch("/api/config/theme")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      currentTheme = data.theme;
+      document.body.className = "theme-" + currentTheme;
+      var sel = document.getElementById("theme-select");
+      if (sel) sel.value = currentTheme;
+    });
+
+  socket.on("theme:changed", function(data) {
+    currentTheme = data.theme;
+    document.body.className = "theme-" + currentTheme;
+    var sel = document.getElementById("theme-select");
+    if (sel) sel.value = currentTheme;
+  });
 });
 
 // --- API helpers ---
@@ -267,6 +287,17 @@ function setupEventListeners() {
   document.getElementById("btn-delete-quest").addEventListener("click", function() {
     if (selectedQuestId) deleteQuest(selectedQuestId);
   });
+
+  var themeSelect = document.getElementById("theme-select");
+  if (themeSelect) {
+    themeSelect.addEventListener("change", function(e) {
+      fetch("/api/config/theme", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ theme: e.target.value })
+      });
+    });
+  }
 }
 
 function selectQuest(id) {
