@@ -1,0 +1,549 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+body {
+  background: #0a0a0a;
+  color: #33ff33;
+  font-family: "Share Tech Mono", "VT323", monospace;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: repeating-linear-gradient(
+    0deg,
+    rgba(0, 0, 0, 0.15) 0px,
+    rgba(0, 0, 0, 0.15) 1px,
+    transparent 1px,
+    transparent 3px
+  );
+  pointer-events: none;
+  z-index: 1000;
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0a0a0a;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #33ff33;
+  border-radius: 3px;
+}
+
+/* ==================== QUEST JOURNAL ==================== */
+
+#quest-journal {
+  padding: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  position: relative;
+}
+
+/* Header */
+header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 30px;
+  padding-bottom: 15px;
+  border-bottom: 2px solid #1a3d1a;
+}
+
+header h1 {
+  font-size: 1.4rem;
+  letter-spacing: 3px;
+  text-shadow: 0 0 10px rgba(51, 255, 51, 0.5);
+}
+
+.back-btn {
+  padding: 8px 16px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: transparent;
+  color: #33ff33;
+  border: 1px solid #33ff33;
+  cursor: pointer;
+  letter-spacing: 1px;
+  text-decoration: none;
+  transition: all 0.2s;
+}
+
+.back-btn:hover {
+  background: rgba(51, 255, 51, 0.1);
+  box-shadow: 0 0 10px rgba(51, 255, 51, 0.3);
+}
+
+/* ==================== TWO-PANEL LAYOUT ==================== */
+
+.quest-layout {
+  display: flex;
+  gap: 20px;
+  min-height: calc(100vh - 150px);
+}
+
+.quest-list-panel {
+  width: 280px;
+  flex-shrink: 0;
+  background: #111;
+  border: 1px solid #1a3d1a;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  max-height: calc(100vh - 150px);
+}
+
+.quest-list-panel h2 {
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  letter-spacing: 3px;
+  color: #2db82d;
+  text-transform: uppercase;
+}
+
+#quest-list {
+  flex: 1;
+  overflow-y: auto;
+  margin-bottom: 12px;
+}
+
+.quest-detail-panel {
+  flex: 1;
+  background: #111;
+  border: 1px solid #1a3d1a;
+  padding: 20px;
+  overflow-y: auto;
+}
+
+/* ==================== QUEST LIST ==================== */
+
+.quest-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 6px;
+  background: #0a0a0a;
+  border: 1px solid #1a3d1a;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.quest-item:hover {
+  border-color: #33ff33;
+}
+
+.quest-item.active {
+  border-color: #33ff33;
+  background: rgba(51, 255, 51, 0.1);
+  box-shadow: 0 0 10px rgba(51, 255, 51, 0.2);
+}
+
+.quest-status {
+  flex-shrink: 0;
+  width: 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: #33ff33;
+}
+
+.quest-status.completed {
+  color: #33ff33;
+}
+
+.quest-status.failed {
+  color: #ff4444;
+  text-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
+}
+
+.quest-name {
+  flex: 1;
+  font-size: 0.85rem;
+  letter-spacing: 1px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.new-quest-btn {
+  width: 100%;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: #33ff33;
+  color: #0a0a0a;
+  border: none;
+  cursor: pointer;
+  letter-spacing: 1px;
+  font-weight: bold;
+  transition: all 0.2s;
+}
+
+.new-quest-btn:hover {
+  background: #4af626;
+  box-shadow: 0 0 15px rgba(51, 255, 51, 0.4);
+}
+
+.empty-text {
+  color: #1a5c1a;
+  font-size: 0.8rem;
+  letter-spacing: 1px;
+  text-align: center;
+  padding: 20px 0;
+}
+
+/* ==================== QUEST DETAIL ==================== */
+
+.quest-header {
+  margin-bottom: 25px;
+}
+
+.quest-name-input {
+  width: 100%;
+  padding: 10px 15px;
+  font-family: inherit;
+  font-size: 1.1rem;
+  background: #0a0a0a;
+  border: 1px solid #1a3d1a;
+  color: #33ff33;
+  outline: none;
+  transition: border-color 0.2s;
+  letter-spacing: 1px;
+  margin-bottom: 10px;
+}
+
+.quest-name-input:focus {
+  border-color: #33ff33;
+}
+
+.quest-name-input::placeholder {
+  color: #1a5c1a;
+}
+
+.quest-desc-input {
+  width: 100%;
+  padding: 10px 15px;
+  font-family: inherit;
+  font-size: 0.9rem;
+  background: #0a0a0a;
+  border: 1px solid #1a3d1a;
+  color: #33ff33;
+  outline: none;
+  resize: vertical;
+  min-height: 60px;
+  transition: border-color 0.2s;
+  margin-bottom: 10px;
+}
+
+.quest-desc-input:focus {
+  border-color: #33ff33;
+}
+
+.quest-desc-input::placeholder {
+  color: #1a5c1a;
+}
+
+.quest-status-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.quest-status-row label {
+  font-size: 0.8rem;
+  color: #2db82d;
+  letter-spacing: 2px;
+}
+
+.quest-status-row select {
+  padding: 8px 12px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: #0a0a0a;
+  border: 1px solid #1a3d1a;
+  color: #33ff33;
+  cursor: pointer;
+  outline: none;
+}
+
+.quest-status-row select:focus {
+  border-color: #33ff33;
+}
+
+.quest-status-row select option {
+  background: #111;
+  color: #33ff33;
+}
+
+.delete-quest-btn {
+  padding: 8px 14px;
+  font-family: inherit;
+  font-size: 0.8rem;
+  background: transparent;
+  color: #ff4444;
+  border: 1px solid #ff4444;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+  margin-left: auto;
+}
+
+.delete-quest-btn:hover {
+  background: rgba(255, 68, 68, 0.1);
+  box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
+}
+
+/* ==================== STAGES ==================== */
+
+.stages-section h2 {
+  font-size: 0.9rem;
+  margin-bottom: 12px;
+  letter-spacing: 3px;
+  color: #2db82d;
+  text-transform: uppercase;
+}
+
+.stage-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  margin-bottom: 6px;
+  background: #0a0a0a;
+  border: 1px solid #1a3d1a;
+  transition: all 0.2s;
+}
+
+.stage-row:hover {
+  border-color: #33ff33;
+}
+
+.stage-row.done {
+  opacity: 0.5;
+}
+
+.stage-row.done .stage-name-input {
+  text-decoration: line-through;
+  color: #1a5c1a;
+}
+
+.stage-end-btn {
+  padding: 4px 10px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  font-weight: bold;
+  letter-spacing: 1px;
+  background: transparent;
+  color: #33ff33;
+  border: 1px solid #33ff33;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+
+.stage-end-btn:hover {
+  background: rgba(51, 255, 51, 0.15);
+  box-shadow: 0 0 8px rgba(51, 255, 51, 0.3);
+}
+
+.stage-end-btn.ended {
+  color: #1a5c1a;
+  border-color: #1a5c1a;
+}
+
+.stage-end-btn.ended:hover {
+  color: #33ff33;
+  border-color: #33ff33;
+  background: rgba(51, 255, 51, 0.1);
+}
+
+.stage-name-input {
+  flex: 1;
+  min-width: 120px;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: transparent;
+  border: 1px solid transparent;
+  color: #33ff33;
+  outline: none;
+  transition: all 0.2s;
+  letter-spacing: 1px;
+}
+
+.stage-name-input:focus {
+  border-color: #33ff33;
+  background: #111;
+}
+
+.stage-name-input::placeholder {
+  color: #1a5c1a;
+}
+
+.stage-broadcast {
+  flex: 1;
+  min-width: 150px;
+  position: relative;
+}
+
+.stage-broadcast-input {
+  width: 100%;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  background: #0a0a0a;
+  border: 1px solid #1a3d1a;
+  color: #33ff33;
+  outline: none;
+  resize: none;
+  min-height: 24px;
+  display: none;
+  transition: border-color 0.2s;
+}
+
+.stage-broadcast-input.visible {
+  display: block;
+}
+
+.stage-broadcast-input:focus {
+  border-color: #33ff33;
+  background: #111;
+}
+
+.stage-broadcast-input::placeholder {
+  color: #1a5c1a;
+}
+
+.broadcast-preview {
+  display: block;
+  padding: 4px 8px;
+  font-size: 0.75rem;
+  color: #2db82d;
+  max-width: 300px;
+  word-wrap: break-word;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: border-color 0.2s;
+}
+
+.broadcast-preview:hover {
+  border-color: #1a3d1a;
+}
+
+.broadcast-preview.hidden {
+  display: none;
+}
+
+.broadcast-preview.none {
+  color: #1a5c1a;
+  font-style: italic;
+}
+
+.stage-delete-btn {
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  background: transparent;
+  color: #ff4444;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+
+.stage-delete-btn:hover {
+  border-color: #ff4444;
+  background: rgba(255, 68, 68, 0.1);
+}
+
+.add-stage-btn {
+  width: 100%;
+  padding: 10px;
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: transparent;
+  color: #33ff33;
+  border: 1px solid #33ff33;
+  cursor: pointer;
+  letter-spacing: 1px;
+  transition: all 0.2s;
+  margin-top: 8px;
+}
+
+.add-stage-btn:hover {
+  background: rgba(51, 255, 51, 0.1);
+  box-shadow: 0 0 10px rgba(51, 255, 51, 0.3);
+}
+
+/* ==================== EMPTY STATE ==================== */
+
+.quest-empty {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  min-height: 300px;
+}
+
+.quest-empty p {
+  color: #1a5c1a;
+  font-size: 0.9rem;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+/* ==================== RESPONSIVE ==================== */
+
+@media (max-width: 768px) {
+  #quest-journal {
+    padding: 15px;
+  }
+
+  header {
+    flex-direction: column;
+    gap: 15px;
+    align-items: flex-start;
+  }
+
+  .quest-layout {
+    flex-direction: column;
+  }
+
+  .quest-list-panel {
+    width: 100%;
+    max-height: 300px;
+  }
+
+  .stage-row {
+    flex-wrap: wrap;
+  }
+
+  .stage-broadcast {
+    width: 100%;
+    order: 10;
+    margin-top: 4px;
+  }
+
+  .stage-name-input {
+    min-width: 80px;
+  }
+}

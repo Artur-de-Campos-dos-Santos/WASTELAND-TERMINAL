@@ -68,9 +68,12 @@ router.post("/message", (req, res) => {
 
   const io = req.app.locals.io;
 
+  console.log(`[MSG] target=${targetType} player=${targetPlayerId} body="${cleanBody.substring(0, 30)}..."`);
+
   if (targetType === "broadcast") {
     io.emit("message:new", message);
   } else {
+    console.log(`[MSG] Emitting to room: player:${targetPlayerId}`);
     io.to(`player:${targetPlayerId}`).emit("message:new", message);
   }
 

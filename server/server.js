@@ -28,6 +28,7 @@ app.use("/api", require("./routes/messages"));
 app.use("/api", require("./routes/auth"));
 app.use("/api", require("./routes/session"));
 app.use("/api/export", require("./routes/export"));
+app.use("/api/quests", require("./routes/quests"));
 
 // Serve pages
 app.get("/player/:id", (req, res) => {
@@ -36,6 +37,10 @@ app.get("/player/:id", (req, res) => {
 
 app.get("/dm", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "dm", "index.html"));
+});
+
+app.get("/dm/quests", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "dm", "quests.html"));
 });
 
 // Socket.IO

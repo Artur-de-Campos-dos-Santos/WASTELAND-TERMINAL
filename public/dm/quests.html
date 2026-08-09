@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>WASTELAND TERMINAL // DIÁRIO DE MISSÕES</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <link rel="stylesheet" href="quests.css">
+</head>
+<body>
+  <div id="quest-journal">
+    <header>
+      <a href="/dm" class="back-btn"><i class="fas fa-arrow-left"></i> VOLTAR</a>
+      <h1>WASTELAND TERMINAL // DIÁRIO DE MISSÕES</h1>
+    </header>
+
+    <div class="quest-layout">
+      <aside class="quest-list-panel">
+        <h2>MISSÕES</h2>
+        <div id="quest-list"></div>
+        <button id="btn-new-quest" class="new-quest-btn">+ NOVA MISSÃO</button>
+      </aside>
+
+      <main class="quest-detail-panel">
+        <div id="quest-detail" class="hidden">
+          <div class="quest-header">
+            <input type="text" id="quest-name" class="quest-name-input" placeholder="Nome da missão">
+            <textarea id="quest-description" class="quest-desc-input" placeholder="Descrição (opcional)"></textarea>
+            <div class="quest-status-row">
+              <label>STATUS:</label>
+              <select id="quest-status">
+                <option value="active">ATIVA</option>
+                <option value="completed">COMPLETA</option>
+                <option value="failed">FALHOU</option>
+              </select>
+              <button id="btn-delete-quest" class="delete-quest-btn"><i class="fas fa-trash"></i></button>
+            </div>
+          </div>
+
+          <div class="stages-section">
+            <h2>ESTÁGIOS</h2>
+            <div id="stages-list"></div>
+            <button id="btn-add-stage" class="add-stage-btn">+ ADICIONAR ESTÁGIO</button>
+          </div>
+        </div>
+
+        <div id="quest-empty" class="quest-empty">
+          <p>Selecione uma missão ou crie uma nova.</p>
+        </div>
+      </main>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="quests.js"></script>
+</body>
+</html>

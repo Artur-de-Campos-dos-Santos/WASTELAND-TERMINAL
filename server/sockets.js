@@ -16,12 +16,13 @@ module.exports = function setupSockets(io, db) {
         const playerId = room.replace("player:", "");
         const player = playerQueries.getById.get(playerId);
         if (!player) {
+          console.log(`[SOCK] Player not found for room: ${room}`);
           socket.emit("error", { message: "Player not found" });
           return;
         }
         socket.join(room);
         socket.data.playerId = playerId;
-        console.log(`Socket ${socket.id} joined room ${room}`);
+        console.log(`[SOCK] Socket ${socket.id} joined room ${room} (player: ${player.display_name})`);
       }
     });
 

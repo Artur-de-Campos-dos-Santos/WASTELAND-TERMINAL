@@ -24,34 +24,23 @@ const socket = io();
 // ==================== CREATURES ====================
 
 const CREATURES = [
-  "Radscorpion",
-  "Deathclaw",
+  "Escorpião radioativo",
+  "Destroçador",
   "Yao Guai",
-  "Super Mutant",
-  "Super Mutant Behemoth",
-  "Feral Ghoul",
-  "Glowing One",
+  "Super Mutante",
+  "Super Mutante Beemote",
+  "Necrótico Feroz",
+  "Brilhante",
   "Mirelurk",
-  "Mirelurk Hunter",
-  "Mirelurk King",
-  "Mole Rat",
-  "Bloatfly",
-  "Bloodbug",
-  "Stingwing",
-  "Cazador",
-  "Radroach",
+  "Mirelurk Caçador",
+  "Mirelurk Rei",
+  "Ratoupeira",
+  "Varejeira-Gigante",
+  "Ferroasa",
+  "Barata Radioativa",
   "Brahmin",
-  "Centaur",
-  "Lakelurk",
-  "Fog Crawler",
-  "Gulper",
-  "Angler",
-  "Cave Cricket",
-  "Gatorclaw",
-  "Spore Carrier",
-  "Radstag",
-  "Mongrel",
-  "Mutant Hound",
+  "Cervo Radioativo",
+  "Cão",
   "Sentry Bot",
   "Protectron",
   "Mr. Handy",
@@ -59,9 +48,8 @@ const CREATURES = [
   "Assaultron",
   "Eyebot",
   "Robobrain",
-  "Raider",
-  "Scrapper",
-  "Swan",
+  "Invasor",
+  "Tribal",
 ];
 
 // ==================== PRESETS ====================
@@ -82,7 +70,7 @@ const PRESETS = [
     icon: "fa-solid fa-heart-pulse",
     label: "CURA",
     fields: [
-      { name: "target", label: "Alvo", type: "player", placeholder: "Quem foi curado?" },
+      { name: "target", label: "Alvo", type: "player-or-creature", placeholder: "Quem foi curado?" },
       { name: "amount", label: "Quantidade", type: "number", placeholder: "8" },
     ],
     template: (f) => `${f.target} recuperou ${f.amount} de vida.`,
@@ -92,8 +80,8 @@ const PRESETS = [
     icon: "fa-solid fa-bolt",
     label: "CRÍTICO",
     fields: [
-      { name: "attacker", label: "Atacante", type: "player", placeholder: "Quem atacou?" },
-      { name: "enemy", label: "Inimigo", type: "creature", placeholder: "Em quem?" },
+      { name: "attacker", label: "Atacante", type: "player-or-creature", placeholder: "Quem atacou?" },
+      { name: "enemy", label: "Inimigo", type: "player-or-creature", placeholder: "Em quem?" },
       { name: "damage", label: "Dano", type: "number", placeholder: "24" },
     ],
     template: (f) => `${f.attacker} acertou um golpe crítico em ${f.enemy} causando ${f.damage} de dano!`,
@@ -103,8 +91,8 @@ const PRESETS = [
     icon: "fa-solid fa-xmark",
     label: "ERROU",
     fields: [
-      { name: "attacker", label: "Atacante", type: "creature", placeholder: "Quem errou?" },
-      { name: "target", label: "Alvo", type: "player", placeholder: "Em quem errou?" },
+      { name: "attacker", label: "Atacante", type: "player-or-creature", placeholder: "Quem errou?" },
+      { name: "target", label: "Alvo", type: "player-or-creature", placeholder: "Em quem errou?" },
     ],
     template: (f) => `${f.attacker} errou o ataque em ${f.target}.`,
   },
@@ -115,7 +103,7 @@ const PRESETS = [
     fields: [
       { name: "days", label: "Dias", type: "number", placeholder: "3" },
     ],
-    template: (f) => `A party viajou por ${f.days} dia${f.days > 1 ? "s" : ""}.`,
+    template: (f) => `A viagem durou ${f.days} dia${f.days > 1 ? "s" : ""}.`,
   },
   {
     id: "camp",
@@ -140,7 +128,7 @@ const PRESETS = [
     icon: "fa-solid fa-wand-sparkles",
     label: "EFEITO",
     fields: [
-      { name: "target", label: "Alvo", type: "player", placeholder: "Quem está sob efeito?" },
+      { name: "target", label: "Alvo", type: "player-or-creature", placeholder: "Quem está sob efeito?" },
       { name: "effect", label: "Efeito", type: "text", placeholder: "Ex: RadAway" },
     ],
     template: (f) => `${f.target} está sob efeito de ${f.effect}.`,
@@ -150,7 +138,7 @@ const PRESETS = [
     icon: "fa-solid fa-face-dizzy",
     label: "CONDIÇÃO",
     fields: [
-      { name: "target", label: "Alvo", type: "player", placeholder: "Quem está afetado?" },
+      { name: "target", label: "Alvo", type: "player-or-creature", placeholder: "Quem está afetado?" },
       {
         name: "condition",
         label: "Condição",
@@ -615,5 +603,11 @@ clearLogBtn.addEventListener("click", async () => {
 function updatePlayerStatuses(data) {
   // Placeholder for real connection tracking
 }
+
+// ==================== QUEST JOURNAL ====================
+
+document.getElementById("btn-quest-journal").addEventListener("click", () => {
+  window.location.href = "/dm/quests";
+});
 
 init();
