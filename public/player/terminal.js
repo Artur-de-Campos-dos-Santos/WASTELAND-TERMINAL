@@ -34,6 +34,17 @@ socket.on("error", (err) => {
   appendSystemLine(`[ ERRO: ${err.message} ]`);
 });
 
+// Listen for theme changes
+fetch("/api/config/theme")
+  .then((r) => r.json())
+  .then((data) => {
+    document.body.className = "theme-" + data.theme;
+  });
+
+socket.on("theme:changed", (data) => {
+  document.body.className = "theme-" + data.theme;
+});
+
 async function loadHistory() {
   try {
     const res = await fetch(`/api/messages/${playerId}`);
