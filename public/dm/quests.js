@@ -2,6 +2,7 @@
 var quests = [];
 var selectedQuestId = null;
 var selectedQuestStages = [];
+var allPlayers = [];
 var currentTheme = "pipboy";
 
 var socket = io();
@@ -9,7 +10,20 @@ var socket = io();
 // --- Init ---
 document.addEventListener("DOMContentLoaded", function() {
   loadQuests();
+  loadPlayers();
   setupEventListeners();
+
+  // Newspaper masthead date (noir theme)
+  var dateEl = document.querySelector(".masthead-date");
+  if (dateEl) {
+    var dateStr = new Date().toLocaleDateString("pt-BR", {
+      weekday: "long",
+      day: "2-digit",
+      month: "long",
+      year: "numeric",
+    });
+    dateEl.textContent = dateStr + " — EDIÇÃO DA MANHÃ";
+  }
 
   // Load theme
   fetch("/api/config/theme")
@@ -122,6 +136,29 @@ function deleteStage(questId, stageId) {
   });
 }
 
+// --- Player Messages ---
+function loadPlayers() {
+  return api("GET", "/players").then(function(data) {
+    allPlayers = data;
+  });
+}
+
+function loadStageMessages(stageId) {
+  if (!selectedQuestId) return Promise.resolve([]);
+  return api("GET", "/quests/" + selectedQuestId + "/stages/" + stageId + "/messages");
+}
+
+function upsertStageMessage(questId, stageId, playerId, messageText) {
+  return api("PUT", "/quests/" + questId + "/stages/" + stageId + "/messages", {
+    player_id: playerId,
+    message_text: messageText,
+  });
+}
+
+function deleteStageMessage(questId, stageId, messageId) {
+  return api("DELETE", "/quests/" + questId + "/stages/" + stageId + "/messages/" + messageId);
+}
+
 // --- Rendering ---
 function renderQuestList() {
   var container = document.getElementById("quest-list");
@@ -177,33 +214,64 @@ function renderStages() {
     return;
   }
 
-  container.innerHTML = selectedQuestStages.map(function(stage) {
-    var doneClass = stage.is_done ? "done" : "";
-    var broadcastPreview;
-    if (stage.broadcast_text) {
-      var text = escapeHtml(stage.broadcast_text.substring(0, 40));
-      if (stage.broadcast_text.length > 40) text += "...";
-      broadcastPreview = '<span class="broadcast-preview">' + text + '</span>';
-    } else {
-      broadcastPreview = '<span class="broadcast-preview none">(nenhum)</span>';
-    }
+  var stageMessagePromises = selectedQuestStages.map(function(stage) {
+    return loadStageMessages(stage.id).then(function(msgs) {
+      return { stageId: stage.id, messages: msgs };
+    });
+  });
 
-    var endLabel = stage.is_done ? "DONE" : "END";
-    var endTitle = stage.is_done ? "Desfazer" : "Finalizar estagio";
-    var endedClass = stage.is_done ? " ended" : "";
+  Promise.all(stageMessagePromises).then(function(results) {
+    var messagesByStage = {};
+    results.forEach(function(r) {
+      messagesByStage[r.stageId] = r.messages;
+    });
 
-    return '<div class="stage-row ' + doneClass + '" data-id="' + stage.id + '">' +
-      '<button class="stage-end-btn' + endedClass + '" title="' + endTitle + '">' + endLabel + '</button>' +
-      '<input type="text" class="stage-name-input" value="' + escapeHtml(stage.name) + '" placeholder="Nome do estagio">' +
-      '<div class="stage-broadcast">' +
-      '<textarea class="stage-broadcast-input" placeholder="Texto do broadcast (opcional)">' + escapeHtml(stage.broadcast_text || "") + '</textarea>' +
-      broadcastPreview +
-      '</div>' +
-      '<button class="stage-delete-btn" title="Excluir estagio"><i class="fas fa-times"></i></button>' +
-      '</div>';
-  }).join("");
+    container.innerHTML = selectedQuestStages.map(function(stage) {
+      var doneClass = stage.is_done ? "done" : "";
+      var broadcastPreview;
+      if (stage.broadcast_text) {
+        var text = escapeHtml(stage.broadcast_text.substring(0, 40));
+        if (stage.broadcast_text.length > 40) text += "...";
+        broadcastPreview = '<span class="broadcast-preview">' + text + '</span>';
+      } else {
+        broadcastPreview = '<span class="broadcast-preview none">(nenhum)</span>';
+      }
 
-  attachStageListeners();
+      var endLabel = stage.is_done ? "DONE" : "END";
+      var endTitle = stage.is_done ? "Desfazer" : "Finalizar estagio";
+      var endedClass = stage.is_done ? " ended" : "";
+
+      var playerMsgs = messagesByStage[stage.id] || [];
+      var configuredPlayers = playerMsgs.map(function(pm) {
+        var player = allPlayers.find(function(p) { return p.id === pm.player_id; });
+        var name = player ? escapeHtml(player.display_name) : pm.player_id;
+        return '<span class="player-msg-badge" data-stage-id="' + stage.id + '" data-player-id="' + pm.player_id + '" data-message-id="' + pm.id + '">' + name + ' <span class="badge-remove">&times;</span></span>';
+      }).join("");
+
+      var playerOptions = allPlayers.map(function(p) {
+        return '<option value="' + p.id + '">' + escapeHtml(p.display_name) + '</option>';
+      }).join("");
+
+      return '<div class="stage-row ' + doneClass + '" data-id="' + stage.id + '">' +
+        '<button class="stage-end-btn' + endedClass + '" title="' + endTitle + '">' + endLabel + '</button>' +
+        '<input type="text" class="stage-name-input" value="' + escapeHtml(stage.name) + '" placeholder="Nome do estagio">' +
+        '<div class="stage-broadcast">' +
+        '<textarea class="stage-broadcast-input" placeholder="Texto do broadcast (fallback)">' + escapeHtml(stage.broadcast_text || "") + '</textarea>' +
+        broadcastPreview +
+        '</div>' +
+        '<button class="stage-delete-btn" title="Excluir estagio"><i class="fas fa-times"></i></button>' +
+        '<div class="stage-player-messages">' +
+        '<div class="player-msg-row">' +
+        '<select class="player-select"><option value="">Selecionar jogador...</option>' + playerOptions + '</select>' +
+        '<textarea class="player-msg-input" placeholder="Mensagem para este jogador" disabled></textarea>' +
+        '</div>' +
+        '<div class="player-msg-badges">' + configuredPlayers + '</div>' +
+        '</div>' +
+        '</div>';
+    }).join("");
+
+    attachStageListeners();
+  });
 }
 
 function attachStageListeners() {
@@ -260,6 +328,76 @@ function attachStageListeners() {
     btn.addEventListener("click", function(e) {
       var stageId = parseInt(e.target.closest(".stage-row").dataset.id);
       deleteStage(questId, stageId);
+    });
+  });
+
+  // Player select + message input
+  document.querySelectorAll(".player-select").forEach(function(select) {
+    select.addEventListener("change", function(e) {
+      var stageRow = e.target.closest(".stage-row");
+      var stageId = parseInt(stageRow.dataset.id);
+      var msgInput = stageRow.querySelector(".player-msg-input");
+      var playerId = e.target.value;
+
+      if (!playerId) {
+        msgInput.value = "";
+        msgInput.disabled = true;
+        return;
+      }
+
+      msgInput.disabled = false;
+
+      loadStageMessages(stageId).then(function(msgs) {
+        var existing = msgs.find(function(m) { return m.player_id === playerId; });
+        msgInput.value = existing ? existing.message_text : "";
+      });
+    });
+  });
+
+  document.querySelectorAll(".player-msg-input").forEach(function(textarea) {
+    var debounce;
+    textarea.addEventListener("input", function(e) {
+      clearTimeout(debounce);
+      debounce = setTimeout(function() {
+        var stageRow = e.target.closest(".stage-row");
+        var stageId = parseInt(stageRow.dataset.id);
+        var select = stageRow.querySelector(".player-select");
+        var playerId = select.value;
+        if (!playerId) return;
+
+        upsertStageMessage(questId, stageId, playerId, e.target.value).then(function() {
+          renderStages();
+        });
+      }, 500);
+    });
+  });
+
+  // Badge click to edit
+  document.querySelectorAll(".player-msg-badge").forEach(function(badge) {
+    badge.addEventListener("click", function(e) {
+      if (e.target.classList.contains("badge-remove")) return;
+      var stageRow = badge.closest(".stage-row");
+      var select = stageRow.querySelector(".player-select");
+      var msgInput = stageRow.querySelector(".player-msg-input");
+      select.value = badge.dataset.playerId;
+      msgInput.disabled = false;
+      loadStageMessages(parseInt(stageRow.dataset.id)).then(function(msgs) {
+        var existing = msgs.find(function(m) { return m.player_id === badge.dataset.playerId; });
+        msgInput.value = existing ? existing.message_text : "";
+      });
+    });
+  });
+
+  // Badge remove button
+  document.querySelectorAll(".badge-remove").forEach(function(btn) {
+    btn.addEventListener("click", function(e) {
+      e.stopPropagation();
+      var badge = e.target.closest(".player-msg-badge");
+      var stageId = badge.dataset.stageId;
+      var messageId = badge.dataset.messageId;
+      deleteStageMessage(questId, stageId, messageId).then(function() {
+        renderStages();
+      });
     });
   });
 }
