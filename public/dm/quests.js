@@ -252,12 +252,15 @@ function renderStages() {
         return '<option value="' + p.id + '">' + escapeHtml(p.display_name) + '</option>';
       }).join("");
 
+      var fallbackChecked = stage.fallback_enabled ? " checked" : "";
+
       return '<div class="stage-row ' + doneClass + '" data-id="' + stage.id + '">' +
         '<button class="stage-end-btn' + endedClass + '" title="' + endTitle + '">' + endLabel + '</button>' +
         '<input type="text" class="stage-name-input" value="' + escapeHtml(stage.name) + '" placeholder="Nome do estagio">' +
         '<div class="stage-broadcast">' +
         '<textarea class="stage-broadcast-input" placeholder="Texto do broadcast (fallback)">' + escapeHtml(stage.broadcast_text || "") + '</textarea>' +
         broadcastPreview +
+        '<label class="fallback-toggle"><input type="checkbox" class="fallback-checkbox"' + fallbackChecked + '> fallback</label>' +
         '</div>' +
         '<button class="stage-delete-btn" title="Excluir estagio"><i class="fas fa-times"></i></button>' +
         '<div class="stage-player-messages">' +
@@ -328,6 +331,14 @@ function attachStageListeners() {
     btn.addEventListener("click", function(e) {
       var stageId = parseInt(e.target.closest(".stage-row").dataset.id);
       deleteStage(questId, stageId);
+    });
+  });
+
+  // Fallback toggle
+  document.querySelectorAll(".fallback-checkbox").forEach(function(checkbox) {
+    checkbox.addEventListener("change", function(e) {
+      var stageId = parseInt(e.target.closest(".stage-row").dataset.id);
+      updateStage(questId, stageId, { fallback_enabled: e.target.checked ? 1 : 0 });
     });
   });
 

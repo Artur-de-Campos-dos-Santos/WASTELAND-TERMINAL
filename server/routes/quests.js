@@ -128,6 +128,13 @@ router.put("/:id/stages/:stageId", (req, res) => {
   }
   const sortOrder = typeof req.body.sort_order === "number" ? req.body.sort_order : stage.sort_order;
 
+  let fallbackEnabled = stage.fallback_enabled;
+  if (typeof req.body.fallback_enabled === "number") {
+    fallbackEnabled = req.body.fallback_enabled ? 1 : 0;
+  } else if (typeof req.body.fallback_enabled === "boolean") {
+    fallbackEnabled = req.body.fallback_enabled ? 1 : 0;
+  }
+
   let isDone = stage.is_done;
   let doneAt = stage.done_at;
 
@@ -140,7 +147,7 @@ router.put("/:id/stages/:stageId", (req, res) => {
     }
   }
 
-  questStageQueries.update.run(name, broadcastText, isDone, doneAt, sortOrder, stageId);
+  questStageQueries.update.run(name, broadcastText, fallbackEnabled, isDone, doneAt, sortOrder, stageId);
   const updated = questStageQueries.getById.get(stageId);
 
   // Broadcast immediately when a stage is marked done
@@ -156,10 +163,11 @@ router.put("/:id/stages/:stageId", (req, res) => {
     });
 
     const broadcastBody = updated.broadcast_text;
+    const fallbackEnabled = updated.fallback_enabled;
     let anySent = false;
 
     players.forEach(function(player) {
-      const body = messageMap[player.id] || broadcastBody;
+      const body = messageMap[player.id] || (fallbackEnabled ? broadcastBody : null);
       if (!body) return;
 
       const result = createMessage(db, {

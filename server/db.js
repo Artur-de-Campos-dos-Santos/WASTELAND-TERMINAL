@@ -57,6 +57,7 @@ function initDatabase() {
       quest_id INTEGER NOT NULL,
       name TEXT NOT NULL,
       broadcast_text TEXT,
+      fallback_enabled INTEGER NOT NULL DEFAULT 1,
       sort_order INTEGER NOT NULL DEFAULT 0,
       is_done INTEGER NOT NULL DEFAULT 0,
       done_at DATETIME,
@@ -85,6 +86,13 @@ function initDatabase() {
   const session = db.prepare("SELECT id FROM session LIMIT 1").get();
   if (!session) {
     db.prepare("INSERT INTO session (created_at) VALUES (CURRENT_TIMESTAMP)").run();
+  }
+
+  // Migrations for existing databases
+  try {
+    db.exec("ALTER TABLE quest_stage ADD COLUMN fallback_enabled INTEGER NOT NULL DEFAULT 1");
+  } catch (e) {
+    // Column already exists, ignore
   }
 
   // Set default theme
@@ -201,7 +209,7 @@ function prepareQueries(db) {
   );
   questStageQueries.getById = db.prepare("SELECT * FROM quest_stage WHERE id = ?");
   questStageQueries.update = db.prepare(
-    "UPDATE quest_stage SET name = ?, broadcast_text = ?, is_done = ?, done_at = ?, sort_order = ? WHERE id = ?"
+    "UPDATE quest_stage SET name = ?, broadcast_text = ?, fallback_enabled = ?, is_done = ?, done_at = ?, sort_order = ? WHERE id = ?"
   );
   questStageQueries.delete = db.prepare("DELETE FROM quest_stage WHERE id = ?");
   questStageQueries.getMaxSortOrder = db.prepare(

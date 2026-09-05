@@ -694,6 +694,24 @@ header h1 {
   color: var(--danger);
 }
 
+/* --- Fallback toggle --- */
+
+.fallback-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+.fallback-checkbox {
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
 /* ==================== EMPTY STATE ==================== */
 
 .quest-empty {
