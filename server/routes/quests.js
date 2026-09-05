@@ -143,31 +143,49 @@ router.put("/:id/stages/:stageId", (req, res) => {
   questStageQueries.update.run(name, broadcastText, isDone, doneAt, sortOrder, stageId);
   const updated = questStageQueries.getById.get(stageId);
 
-  // Broadcast immediately when a stage with broadcast_text is marked done
-  if (isDone === 1 && updated.broadcast_text) {
+  // Broadcast immediately when a stage is marked done
+  if (isDone === 1) {
     const io = req.app.locals.io;
     const db = req.app.locals.db;
 
-    const result = createMessage(db, {
-      targetType: "broadcast",
-      targetPlayerId: null,
-      body: updated.broadcast_text,
-      source: "auto",
+    const players = playerQueries.getAll.all();
+    const playerMessages = questStagePlayerMessageQueries.getByStage.all(stageId);
+    const messageMap = {};
+    playerMessages.forEach(function(pm) {
+      messageMap[pm.player_id] = pm.message_text;
     });
 
-    const message = {
-      id: result.lastInsertRowid,
-      target_type: "broadcast",
-      target_player_id: null,
-      body: updated.broadcast_text,
-      source: "auto",
-      created_at: new Date().toISOString(),
-    };
+    const broadcastBody = updated.broadcast_text;
+    let anySent = false;
 
-    io.emit("message:new", message);
-    io.to("admin").emit("message:new", message);
+    players.forEach(function(player) {
+      const body = messageMap[player.id] || broadcastBody;
+      if (!body) return;
 
-    updated._broadcastSent = true;
+      const result = createMessage(db, {
+        targetType: "player",
+        targetPlayerId: player.id,
+        body: body,
+        source: "auto",
+      });
+
+      const message = {
+        id: result.lastInsertRowid,
+        target_type: "player",
+        target_player_id: player.id,
+        body: body,
+        source: "auto",
+        created_at: new Date().toISOString(),
+      };
+
+      io.to("player:" + player.id).emit("message:new", message);
+      io.to("admin").emit("message:new", message);
+      anySent = true;
+    });
+
+    if (anySent) {
+      updated._broadcastSent = true;
+    }
   }
 
   res.json(updated);
