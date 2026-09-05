@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { questQueries, questStageQueries, createMessage } = require("../db");
+const { questQueries, questStageQueries, questStagePlayerMessageQueries, playerQueries, createMessage } = require("../db");
 const { MAX_MESSAGE_LENGTH } = require("../../config/config");
 
 function sanitize(str) {
@@ -220,6 +220,83 @@ router.put("/:id/stages/reorder", (req, res) => {
 
   const stages = questStageQueries.getByQuest.all(id);
   res.json(stages);
+});
+
+// GET /api/quests/:id/stages/:stageId/messages - list player messages for a stage
+router.get("/:id/stages/:stageId/messages", (req, res) => {
+  const { id, stageId } = req.params;
+  const quest = questQueries.getById.get(id);
+  if (!quest) {
+    return res.status(404).json({ error: "Quest not found" });
+  }
+
+  const stage = questStageQueries.getById.get(stageId);
+  if (!stage || stage.quest_id !== parseInt(id)) {
+    return res.status(404).json({ error: "Stage not found" });
+  }
+
+  const messages = questStagePlayerMessageQueries.getByStage.all(stageId);
+  res.json(messages);
+});
+
+// PUT /api/quests/:id/stages/:stageId/messages - upsert a player message
+router.put("/:id/stages/:stageId/messages", (req, res) => {
+  const { id, stageId } = req.params;
+  const quest = questQueries.getById.get(id);
+  if (!quest) {
+    return res.status(404).json({ error: "Quest not found" });
+  }
+
+  const stage = questStageQueries.getById.get(stageId);
+  if (!stage || stage.quest_id !== parseInt(id)) {
+    return res.status(404).json({ error: "Stage not found" });
+  }
+
+  const { player_id, message_text } = req.body;
+  if (!player_id) {
+    return res.status(400).json({ error: "player_id is required" });
+  }
+
+  const player = playerQueries.getById.get(player_id);
+  if (!player) {
+    return res.status(404).json({ error: "Player not found" });
+  }
+
+  const cleanText = sanitize(message_text) || null;
+
+  // If message_text is empty/null, delete the row (no custom message)
+  if (!cleanText) {
+    const existing = questStagePlayerMessageQueries.getByStageAndPlayer.get(stageId, player_id);
+    if (existing) {
+      questStagePlayerMessageQueries.delete.run(existing.id);
+    }
+    return res.json({ deleted: true });
+  }
+
+  if (cleanText.length > MAX_MESSAGE_LENGTH) {
+    return res.status(400).json({ error: `Message too long (max ${MAX_MESSAGE_LENGTH} characters)` });
+  }
+
+  questStagePlayerMessageQueries.upsert.run(stageId, player_id, cleanText);
+  const updated = questStagePlayerMessageQueries.getByStageAndPlayer.get(stageId, player_id);
+  res.json(updated);
+});
+
+// DELETE /api/quests/:id/stages/:stageId/messages/:messageId - delete a player message
+router.delete("/:id/stages/:stageId/messages/:messageId", (req, res) => {
+  const { id, stageId, messageId } = req.params;
+  const quest = questQueries.getById.get(id);
+  if (!quest) {
+    return res.status(404).json({ error: "Quest not found" });
+  }
+
+  const stage = questStageQueries.getById.get(stageId);
+  if (!stage || stage.quest_id !== parseInt(id)) {
+    return res.status(404).json({ error: "Stage not found" });
+  }
+
+  questStagePlayerMessageQueries.delete.run(messageId);
+  res.json({ ok: true });
 });
 
 module.exports = router;
