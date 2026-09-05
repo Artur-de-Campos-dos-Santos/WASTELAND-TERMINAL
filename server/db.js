@@ -68,6 +68,17 @@ function initDatabase() {
       key TEXT PRIMARY KEY,
       value TEXT NOT NULL
     );
+
+    CREATE TABLE IF NOT EXISTS quest_stage_player_message (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      stage_id INTEGER NOT NULL,
+      player_id TEXT NOT NULL,
+      message_text TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (stage_id) REFERENCES quest_stage(id) ON DELETE CASCADE,
+      FOREIGN KEY (player_id) REFERENCES player(id) ON DELETE CASCADE,
+      UNIQUE(stage_id, player_id)
+    );
   `);
 
   // Ensure at least one session exists
@@ -126,6 +137,16 @@ const questStageQueries = {
   getMaxSortOrder: null,
   countUndone: null,
   reorder: null,
+};
+
+// --- Quest Stage Player Message queries ---
+
+const questStagePlayerMessageQueries = {
+  getByStage: null,
+  getByStageAndPlayer: null,
+  upsert: null,
+  delete: null,
+  deleteByStage: null,
 };
 
 // --- Config queries ---
@@ -193,6 +214,23 @@ function prepareQueries(db) {
     "UPDATE quest_stage SET sort_order = ? WHERE id = ?"
   );
 
+  // Quest Stage Player Message queries
+  questStagePlayerMessageQueries.getByStage = db.prepare(
+    "SELECT * FROM quest_stage_player_message WHERE stage_id = ? ORDER BY created_at"
+  );
+  questStagePlayerMessageQueries.getByStageAndPlayer = db.prepare(
+    "SELECT * FROM quest_stage_player_message WHERE stage_id = ? AND player_id = ?"
+  );
+  questStagePlayerMessageQueries.upsert = db.prepare(
+    "INSERT INTO quest_stage_player_message (stage_id, player_id, message_text) VALUES (?, ?, ?) ON CONFLICT(stage_id, player_id) DO UPDATE SET message_text = excluded.message_text"
+  );
+  questStagePlayerMessageQueries.delete = db.prepare(
+    "DELETE FROM quest_stage_player_message WHERE id = ?"
+  );
+  questStagePlayerMessageQueries.deleteByStage = db.prepare(
+    "DELETE FROM quest_stage_player_message WHERE stage_id = ?"
+  );
+
   // Config queries
   configQueries.get = db.prepare("SELECT value FROM config WHERE key = ?");
   configQueries.set = db.prepare(
@@ -213,4 +251,5 @@ module.exports = {
   questQueries,
   questStageQueries,
   configQueries,
+  questStagePlayerMessageQueries,
 };
