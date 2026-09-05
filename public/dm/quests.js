@@ -159,6 +159,46 @@ function deleteStageMessage(questId, stageId, messageId) {
   return api("DELETE", "/quests/" + questId + "/stages/" + stageId + "/messages/" + messageId);
 }
 
+function refreshStageBadges(stageId) {
+  loadStageMessages(stageId).then(function(msgs) {
+    var stageRow = document.querySelector('.stage-row[data-id="' + stageId + '"]');
+    if (!stageRow) return;
+    var badgesContainer = stageRow.querySelector(".player-msg-badges");
+    if (!badgesContainer) return;
+
+    badgesContainer.innerHTML = msgs.map(function(pm) {
+      var player = allPlayers.find(function(p) { return p.id === pm.player_id; });
+      var name = player ? escapeHtml(player.display_name) : pm.player_id;
+      return '<span class="player-msg-badge" data-stage-id="' + stageId + '" data-player-id="' + pm.player_id + '" data-message-id="' + pm.id + '">' + name + ' <span class="badge-remove">&times;</span></span>';
+    }).join("");
+
+    badgesContainer.querySelectorAll(".badge-remove").forEach(function(btn) {
+      btn.addEventListener("click", function(e) {
+        e.stopPropagation();
+        var badge = e.target.closest(".player-msg-badge");
+        deleteStageMessage(selectedQuestId, badge.dataset.stageId, badge.dataset.messageId).then(function() {
+          refreshStageBadges(badge.dataset.stageId);
+        });
+      });
+    });
+
+    badgesContainer.querySelectorAll(".player-msg-badge").forEach(function(badge) {
+      badge.addEventListener("click", function(e) {
+        if (e.target.classList.contains("badge-remove")) return;
+        var row = badge.closest(".stage-row");
+        var select = row.querySelector(".player-select");
+        var msgInput = row.querySelector(".player-msg-input");
+        select.value = badge.dataset.playerId;
+        msgInput.disabled = false;
+        loadStageMessages(parseInt(row.dataset.id)).then(function(msgs2) {
+          var existing = msgs2.find(function(m) { return m.player_id === badge.dataset.playerId; });
+          msgInput.value = existing ? existing.message_text : "";
+        });
+      });
+    });
+  });
+}
+
 // --- Rendering ---
 function renderQuestList() {
   var container = document.getElementById("quest-list");
@@ -377,7 +417,7 @@ function attachStageListeners() {
         if (!playerId) return;
 
         upsertStageMessage(questId, stageId, playerId, e.target.value).then(function() {
-          renderStages();
+          refreshStageBadges(stageId);
         });
       }, 500);
     });
@@ -407,7 +447,7 @@ function attachStageListeners() {
       var stageId = badge.dataset.stageId;
       var messageId = badge.dataset.messageId;
       deleteStageMessage(questId, stageId, messageId).then(function() {
-        renderStages();
+        refreshStageBadges(stageId);
       });
     });
   });
