@@ -91,7 +91,7 @@ body.theme-cave {
 }
 
 body.theme-noir {
-  --bg: #e8dfc4;
+  --bg: #f6f4ec;
   --text: #1a1a1a;
   --text-dim: #5a5548;
   --accent: #3a3530;
@@ -99,15 +99,21 @@ body.theme-noir {
   --danger: #6a1a1a;
   --danger-bg: rgba(106, 26, 26, 0.1);
   --btn-bg: #1a1a1a;
-  --btn-text: #e8dfc4;
+  --btn-text: #f6f4ec;
   --btn-hover: #3a3a3a;
-  --card-bg: #ddd5bc;
-  --input-bg: #f0e8d0;
+  --card-bg: #efece0;
+  --input-bg: #faf8f1;
   --font-main: "Special Elite", cursive;
-  --bg-texture: url("/images/noise.png");
+  --bg-texture: url("/images/grunge-paper.jpg");
   --overlay: none;
   --glow: none;
   --glow-strong: none;
+  --font-masthead: "Old Standard TT", Georgia, serif;
+  --font-headline: "Old Standard TT", Georgia, serif;
+  --font-body: "Source Serif 4", Georgia, serif;
+  --rule: #1a1a1a;
+  --hairline: #b8ad94;
+  --ink-tint: rgba(26, 26, 26, 0.06);
 }
 
 .hidden {
@@ -591,6 +597,103 @@ header h1 {
   box-shadow: var(--glow);
 }
 
+/* --- Player messages per stage --- */
+
+.stage-player-messages {
+  width: 100%;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+
+.player-msg-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.player-select {
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  min-width: 140px;
+}
+
+.player-select:focus {
+  border-color: var(--text);
+}
+
+.player-select option {
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+.player-msg-input {
+  flex: 1;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  outline: none;
+  resize: none;
+  min-height: 24px;
+  transition: border-color 0.2s;
+}
+
+.player-msg-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.player-msg-input:focus {
+  border-color: var(--text);
+  background: var(--card-bg);
+}
+
+.player-msg-input::placeholder {
+  color: var(--text-dim);
+}
+
+.player-msg-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.player-msg-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  background: var(--accent);
+  color: var(--btn-text);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.player-msg-badge:hover {
+  opacity: 0.8;
+}
+
+.badge-remove {
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+.badge-remove:hover {
+  color: var(--danger);
+}
+
 /* ==================== EMPTY STATE ==================== */
 
 .quest-empty {
@@ -643,4 +746,271 @@ header h1 {
   .stage-name-input {
     min-width: 80px;
   }
+
+  .player-msg-row {
+    flex-direction: column;
+  }
+
+  .player-select {
+    width: 100%;
+  }
+}
+
+/* ==================== NOIR NEWSPAPER (1950s BROADSHEET) ==================== */
+
+body.theme-noir {
+  font-family: var(--font-body);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-blend-mode: multiply;
+}
+
+/* --- Masthead --- */
+
+.masthead {
+  display: none;
+}
+
+body.theme-noir .masthead {
+  display: block;
+  text-align: center;
+  padding: 0 0 10px;
+  margin-bottom: 18px;
+  border-bottom: 3px solid var(--rule);
+  position: relative;
+}
+
+body.theme-noir .masthead::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  border-bottom: 1px solid var(--rule);
+}
+
+body.theme-noir .masthead-title {
+  display: block;
+  font-family: var(--font-masthead);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 5vw, 2.7rem);
+  line-height: 1.05;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  text-shadow: none;
+}
+
+body.theme-noir .masthead-date {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+body.theme-noir header h1 {
+  display: none;
+}
+
+body.theme-noir header {
+  border-bottom-color: var(--hairline);
+}
+
+/* --- Headlines --- */
+
+body.theme-noir .quest-list-panel h2,
+body.theme-noir .stages-section h2 {
+  font-family: var(--font-headline);
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--text);
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+  border-bottom: 3px solid var(--rule);
+  position: relative;
+}
+
+body.theme-noir .quest-list-panel h2::after,
+body.theme-noir .stages-section h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* --- Panels: no boxes, hairline columns --- */
+
+body.theme-noir .quest-list-panel,
+body.theme-noir .quest-detail-panel {
+  background: transparent;
+  border-radius: 0;
+}
+
+body.theme-noir .quest-list-panel {
+  border: none;
+  border-right: 1px solid var(--hairline);
+  padding-right: 20px;
+}
+
+body.theme-noir .quest-detail-panel {
+  border: none;
+  padding-left: 20px;
+}
+
+/* --- Quest items: article rows --- */
+
+body.theme-noir .quest-item {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  padding: 10px 6px;
+}
+
+body.theme-noir .quest-item:hover {
+  border-bottom-color: var(--text);
+  background: var(--ink-tint);
+}
+
+body.theme-noir .quest-item.active {
+  border-bottom: 2px solid var(--rule);
+  background: var(--ink-tint);
+  box-shadow: none;
+}
+
+/* --- Forms --- */
+
+body.theme-noir input[type="text"],
+body.theme-noir input[type="number"],
+body.theme-noir input[type="password"],
+body.theme-noir textarea,
+body.theme-noir select {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--text);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.theme-noir input:focus,
+body.theme-noir textarea:focus,
+body.theme-noir select:focus {
+  outline: none;
+  border-bottom: 2px solid var(--text);
+  box-shadow: none;
+}
+
+body.theme-noir input::placeholder,
+body.theme-noir textarea::placeholder {
+  color: var(--text-dim);
+  opacity: 1;
+}
+
+body.theme-noir select option {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Quest name = headline field */
+body.theme-noir .quest-name-input {
+  font-family: var(--font-headline);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin-bottom: 12px;
+}
+
+body.theme-noir .quest-status-row label {
+  font-family: var(--font-main);
+  letter-spacing: 1px;
+}
+
+/* --- Buttons --- */
+
+body.theme-noir button {
+  border-radius: 0;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+body.theme-noir button:hover {
+  box-shadow: none;
+}
+
+body.theme-noir .back-btn:hover,
+body.theme-noir .add-stage-btn:hover,
+body.theme-noir .stage-end-btn:hover {
+  background: var(--ink-tint);
+}
+
+body.theme-noir .back-btn {
+  font-family: var(--font-main);
+}
+
+/* --- Stages: article steps --- */
+
+body.theme-noir .stage-row {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+}
+
+body.theme-noir .stage-row:hover {
+  border-bottom-color: var(--text);
+  background: var(--ink-tint);
+}
+
+body.theme-noir .stage-row.done {
+  opacity: 0.55;
+}
+
+body.theme-noir .stage-broadcast-input,
+body.theme-noir .stage-name-input {
+  background: transparent;
+}
+
+body.theme-noir .stage-name-input:focus,
+body.theme-noir .stage-broadcast-input:focus {
+  background: var(--input-bg);
+  border-color: var(--text);
+}
+
+body.theme-noir .broadcast-preview {
+  color: var(--text-dim);
+}
+
+body.theme-noir .stage-player-messages {
+  border-top-color: var(--hairline);
+}
+
+body.theme-noir .player-select,
+body.theme-noir .player-msg-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--text);
+  border-radius: 0;
+}
+
+body.theme-noir .player-select:focus,
+body.theme-noir .player-msg-input:focus {
+  border-bottom: 2px solid var(--text);
+}
+
+body.theme-noir .player-msg-badge {
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 0;
+}
+
+body.theme-noir .quest-empty p {
+  letter-spacing: 1px;
 }
