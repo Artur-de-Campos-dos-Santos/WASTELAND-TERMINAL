@@ -580,10 +580,24 @@ function appendGodView(msg) {
       ? "BROADCAST"
       : `→ ${msg.target_player_id}`;
 
-  div.innerHTML = `<span class="target">[${target}]</span> [${time}] ${msg.body}`;
+  div.innerHTML = `<span class="target">[${target}]</span> <span class="msg-time">[${time}]</span> ${msg.body}`;
   godView.appendChild(div);
   godView.scrollTop = godView.scrollHeight;
 }
+
+function setMastheadDate() {
+  const el = document.querySelector(".masthead-date");
+  if (!el) return;
+  const dateStr = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+  el.textContent = `${dateStr} — EDIÇÃO DA MANHÃ`;
+}
+
+setMastheadDate();
 
 // ==================== EXPORT ====================
 

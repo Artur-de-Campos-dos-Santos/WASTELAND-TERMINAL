@@ -16,7 +16,14 @@ Add a visual theme system to the Wasteland Terminal. The DM picks a theme from a
 | `pipboy` | Pip-Boy | #0a0a0a | #33ff33 | Share Tech Mono | CRT scanlines, green glow |
 | `oldpaper` | Old Paper | #f4e8c1 | #3e2a14 | Caveat (handwritten) | Paper texture background |
 | `cave` | Cave Writings | #1a1a1a | #c9b896 | MedievalSharp | Stone texture background |
-| `noir` | Noir Detective | #e8dfc4 | #1a1a1a | Special Elite (typewriter) | Yellowed paper, film grain |
+| `noir` | Noir Detective | #f6f4ec | #1a1a1a | Special Elite (typewriter) | Aged paper (multiply blend), film grain |
+
+> **Noir = 1950s broadsheet:** the noir theme renders all three surfaces as a
+> classic newspaper (*The New York Times* masthead, serif headlines with double
+> rules, typewriter datelines/bylines, underline form fields, roster rows with
+> hairlines). It's intended for real-world campaigns (e.g. Call of Cthulhu).
+> Newspaper styling is scoped entirely under `body.theme-noir` overrides in
+> each CSS file — no HTML/JS behavior changes.
 
 ## Architecture
 
@@ -50,7 +57,7 @@ body.theme-pipboy {
 
 | Variable | Pip-Boy | Old Paper | Cave | Noir |
 |----------|---------|-----------|------|------|
-| `--bg` | #0a0a0a | #f4e8c1 | #1a1a1a | #e8dfc4 |
+| `--bg` | #0a0a0a | #f4e8c1 | #1a1a1a | #f6f4ec |
 | `--text` | #33ff33 | #3e2a14 | #c9b896 | #1a1a1a |
 | `--text-dim` | #1a5c1a | #7a6548 | #7a6e54 | #5a5548 |
 | `--accent` | #2db82d | #8b6914 | #8b7d5a | #3a3530 |
@@ -58,14 +65,55 @@ body.theme-pipboy {
 | `--danger` | #ff4444 | #8b2500 | #a63a1a | #6a1a1a |
 | `--danger-bg` | rgba(255,68,68,0.1) | rgba(139,37,0,0.1) | rgba(166,58,26,0.1) | rgba(106,26,26,0.1) |
 | `--btn-bg` | #33ff33 | #8b6914 | #8b7d5a | #1a1a1a |
-| `--btn-text` | #0a0a0a | #f4e8c1 | #1a1a1a | #e8dfc4 |
+| `--btn-text` | #0a0a0a | #f4e8c1 | #1a1a1a | #f6f4ec |
 | `--btn-hover` | #4af626 | #a67c1a | #a69470 | #3a3a3a |
-| `--card-bg` | #111 | #ebe0c4 | #242018 | #ddd5bc |
-| `--input-bg` | #0a0a0a | #f9f1dc | #1a1714 | #f0e8d0 |
+| `--card-bg` | #111 | #ebe0c4 | #242018 | #efece0 |
+| `--input-bg` | #0a0a0a | #f9f1dc | #1a1714 | #faf8f1 |
 | `--font-main` | "Share Tech Mono" | "Caveat" | "MedievalSharp" | "Special Elite" |
-| `--bg-texture` | none | url("/images/paper-texture.png") | url("/images/stone-texture.png") | url("/images/noise.png") |
+| `--bg-texture` | none | url("/images/paper-texture.png") | url("/images/stone-texture.png") | url("/images/grunge-paper.jpg") |
 | `--overlay` | repeating-linear-gradient... | none | none | none |
 | `--glow` | 0 0 10px rgba(51,255,51,0.5) | none | none | none |
+
+### Noir-only typography variables
+
+Only the noir theme defines these (used by its newspaper overrides):
+
+| Variable | Noir value | Used for |
+|----------|-----------|----------|
+| `--font-masthead` | "Old Standard TT", Georgia, serif | Nameplate "The New York Times" |
+| `--font-headline` | "Old Standard TT", Georgia, serif | Section headlines, broadcast headlines |
+| `--font-body` | "Source Serif 4", Georgia, serif | Body text, paragraphs, news briefs |
+| `--rule` | #1a1a1a | Heavy double rules under masthead/headlines |
+| `--hairline` | #b8ad94 | Light separator lines between rows/items |
+| `--ink-tint` | rgba(26,26,26,0.06) | Hover tint on newspaper surfaces |
+
+### Masthead markup
+
+Each page (auth screen, dashboard, quest journal, player terminal) has:
+
+```html
+<div class="masthead">
+  <span class="masthead-title">The New York Times</span>
+  <span class="masthead-date"></span>
+</div>
+```
+
+- Hidden by default (`.masthead { display: none }`), shown only under `body.theme-noir`.
+- `.masthead-date` is filled by JS on load (today's date, pt-BR, "EDIÇÃO DA MANHÃ").
+- The player terminal's masthead is compact (`clamp(1.5rem, 4.5vw, 2.2rem)`) since it
+  shares the screen with the message feed; DM pages use `clamp(1.9rem, 5vw, 2.7rem)`.
+
+### Newspaper styling summary (noir overrides)
+
+- **Masthead:** centered nameplate + date line, thick 3px + thin 1px double rule below.
+- **Section headers** (`section h2` / panel `h2`): Old Standard TT bold serif, double rule beneath.
+- **Player terminal:** broadcasts render as front-page headlines (serif bold, double rule above,
+  typewriter dateline); private messages are serif paragraphs; system messages are small-caps
+  notices. The time is a `.line-time` span, body is a `.line-body` span (inline in other themes).
+- **DM feed:** each message is a news brief with typewriter dateline; broadcasts are headline briefs.
+- **Forms:** underline fields (no boxes), squared ink buttons.
+- **Cards:** player cards and quest items lose their boxed look — hairline-separated roster rows.
+- CRT vignette, flicker, and glow are disabled under noir.
 
 ## Theme Switching Flow
 
@@ -107,7 +155,7 @@ Default row: `key: 'theme', value: 'pipboy'`
 Add to all HTML `<head>` sections:
 
 ```html
-<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=MedievalSharp&family=Share+Tech+Mono&family=Special+Elite&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=MedievalSharp&family=Old+Standard+TT:wght@400;700&family=Share+Tech+Mono&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Special+Elite&display=swap" rel="stylesheet">
 ```
 
 ## Texture Images
@@ -116,7 +164,7 @@ Add to all HTML `<head>` sections:
 |------|---------|------|-------------|
 | `public/images/paper-texture.png` | Old Paper theme | ~5KB | Tileable parchment grain |
 | `public/images/stone-texture.png` | Cave theme | ~8KB | Tileable dark rock |
-| `public/images/noise.png` | Noir theme | ~2KB | Tileable film grain |
+| `public/images/grunge-paper.jpg` | Noir theme | ~300KB | Aged crumpled paper (1920×1536, shadow-lifted) — non-tileable, served `cover` + `multiply` blend over the cream background |
 
 ## UI Elements
 

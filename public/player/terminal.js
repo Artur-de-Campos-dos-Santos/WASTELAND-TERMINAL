@@ -72,14 +72,21 @@ function appendMessage(msg, typewrite) {
     hour12: false,
   });
 
-  const text = `[${time}] ${msg.body}`;
+  const timeSpan = document.createElement("span");
+  timeSpan.className = "line-time";
+  timeSpan.textContent = `[${time}]`;
+
+  const bodySpan = document.createElement("span");
+  bodySpan.className = "line-body";
 
   if (typewrite) {
-    typewriteText(line, text);
+    typewriteText(bodySpan, msg.body);
   } else {
-    line.textContent = text;
+    bodySpan.textContent = msg.body;
   }
 
+  line.appendChild(timeSpan);
+  line.appendChild(bodySpan);
   output.appendChild(line);
   autoScroll();
 }
@@ -110,3 +117,17 @@ function autoScroll() {
     screen.scrollTop = screen.scrollHeight;
   }
 }
+
+function setMastheadDate() {
+  const el = document.querySelector(".masthead-date");
+  if (!el) return;
+  const dateStr = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+  el.textContent = `${dateStr} — EDIÇÃO DA MANHÃ`;
+}
+
+setMastheadDate();

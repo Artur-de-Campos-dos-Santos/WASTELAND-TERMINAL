@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rádio Delta Roots</title>
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="radio.css">
+</head>
+<body>
+  <!-- Click to Start Overlay -->
+  <div id="overlay" class="overlay">
+    <div class="overlay-content">
+      <div class="overlay-icon">&#9654;</div>
+      <div class="overlay-text">CLIQUE PARA LIGAR</div>
+      <div class="overlay-sub">RÁDIO DELTA ROOTS</div>
+    </div>
+  </div>
+
+  <div class="cursor cursor-default"></div>
+
+  <div class="frame">
+    <div class="piece output container">
+      <div class="pipboy">
+
+        <!-- Tab Bar -->
+        <ul class="pip-foot">
+          <li><a href="#">Items</a></li>
+          <li><a href="#">Stats</a></li>
+          <li><a href="#">Quests</a></li>
+          <li><a href="#">Misc</a></li>
+          <li class="active"><a href="#" class="active">Radio</a></li>
+        </ul>
+
+        <div class="tab-content">
+          <!-- Radio Tab -->
+          <div class="tab-pane active" id="radio-tab">
+            <h3 class="pip-title">Radio</h3>
+            <div class="pip-body">
+              <ul class="options">
+                <li><input type="checkbox" id="station-check" checked><label for="station-check">Rádio Delta Roots</label></li>
+                <li class="disabled"><label>Classic Radio</label></li>
+              </ul>
+              <div class="info">
+                <div class="post">
+                  <!-- Wave Animation -->
+                  <div class="wave-container">
+                    <canvas class="wave-canvas"></canvas>
+                  </div>
+
+                  <!-- Track Info -->
+                  <div class="track-info">
+                    <div class="track-label">NOW PLAYING:</div>
+                    <div class="track-title" id="track-title">Aguardando...</div>
+                    <div class="track-type" id="track-type"></div>
+                    <div class="dj-name">"Blues Man"</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="piece glow noclick"></div>
+      <div class="piece scanlines noclick"></div>
+    </div>
+  </div>
+
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="radio.js"></script>
+</body>
+</html>

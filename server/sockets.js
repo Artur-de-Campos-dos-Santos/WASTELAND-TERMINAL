@@ -1,5 +1,11 @@
 const { playerQueries, configQueries } = require("./db");
 
+let radioInstance = null;
+
+function setRadioInstance(radio) {
+  radioInstance = radio;
+}
+
 function emitTheme(socket) {
   const themeRow = configQueries.get.get("theme");
   socket.emit("theme:changed", { theme: themeRow ? themeRow.value : "pipboy" });
@@ -8,6 +14,24 @@ function emitTheme(socket) {
 module.exports = function setupSockets(io, db) {
   io.on("connection", (socket) => {
     console.log(`Socket connected: ${socket.id}`);
+
+    // Sync radio state for new connections
+    if (radioInstance) {
+      const state = radioInstance.getState();
+      socket.emit("radio:sync", state);
+    }
+
+    socket.on("radio:trackEnded", () => {
+      if (radioInstance) {
+        radioInstance.onTrackEnded();
+      }
+    });
+
+    socket.on("radio:clientReady", () => {
+      if (radioInstance) {
+        radioInstance.clientReady();
+      }
+    });
 
     socket.on("join", (room) => {
       if (room === "admin") {
@@ -38,3 +62,5 @@ module.exports = function setupSockets(io, db) {
     });
   });
 };
+
+module.exports.setRadioInstance = setRadioInstance;
