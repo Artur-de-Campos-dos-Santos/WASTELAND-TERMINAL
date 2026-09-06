@@ -6,10 +6,14 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
+/* Theme variables */
 body {
-  background: #0a0a0a;
-  color: #33ff33;
-  font-family: "Share Tech Mono", "VT323", monospace;
+  background-color: var(--bg);
+  background-image: var(--bg-texture);
+  background-repeat: repeat;
+  background-size: 200px 200px;
+  color: var(--text);
+  font-family: var(--font-main);
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -21,15 +25,95 @@ body::before {
   left: 0;
   width: 100%;
   height: 100%;
-  background: repeating-linear-gradient(
-    0deg,
-    rgba(0, 0, 0, 0.15) 0px,
-    rgba(0, 0, 0, 0.15) 1px,
-    transparent 1px,
-    transparent 3px
-  );
+  background: var(--overlay);
   pointer-events: none;
   z-index: 1000;
+}
+
+body.theme-pipboy {
+  --bg: #0a0a0a;
+  --text: #33ff33;
+  --text-dim: #1a5c1a;
+  --accent: #2db82d;
+  --border: #1a3d1a;
+  --danger: #ff4444;
+  --danger-bg: rgba(255, 68, 68, 0.1);
+  --btn-bg: #33ff33;
+  --btn-text: #0a0a0a;
+  --btn-hover: #4af626;
+  --card-bg: #111;
+  --input-bg: #0a0a0a;
+  --font-main: "Share Tech Mono", "VT323", monospace;
+  --bg-texture: none;
+  --overlay: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 3px);
+  --glow: 0 0 10px rgba(51, 255, 51, 0.5);
+  --glow-strong: 0 0 20px rgba(51, 255, 51, 0.5);
+}
+
+body.theme-oldpaper {
+  --bg: #f4e8c1;
+  --text: #3e2a14;
+  --text-dim: #7a6548;
+  --accent: #8b6914;
+  --border: #c9b88a;
+  --danger: #8b2500;
+  --danger-bg: rgba(139, 37, 0, 0.1);
+  --btn-bg: #8b6914;
+  --btn-text: #f4e8c1;
+  --btn-hover: #a67c1a;
+  --card-bg: #ebe0c4;
+  --input-bg: #f9f1dc;
+  --font-main: "Caveat", cursive;
+  --bg-texture: url("/images/paper-texture.png");
+  --overlay: none;
+  --glow: none;
+  --glow-strong: none;
+}
+
+body.theme-cave {
+  --bg: #1a1a1a;
+  --text: #c9b896;
+  --text-dim: #7a6e54;
+  --accent: #8b7d5a;
+  --border: #3a3228;
+  --danger: #a63a1a;
+  --danger-bg: rgba(166, 58, 26, 0.1);
+  --btn-bg: #8b7d5a;
+  --btn-text: #1a1a1a;
+  --btn-hover: #a69470;
+  --card-bg: #242018;
+  --input-bg: #1a1714;
+  --font-main: "MedievalSharp", cursive;
+  --bg-texture: url("/images/stone-texture.png");
+  --overlay: none;
+  --glow: none;
+  --glow-strong: none;
+}
+
+body.theme-noir {
+  --bg: #f6f4ec;
+  --text: #1a1a1a;
+  --text-dim: #5a5548;
+  --accent: #3a3530;
+  --border: #b8ad94;
+  --danger: #6a1a1a;
+  --danger-bg: rgba(106, 26, 26, 0.1);
+  --btn-bg: #1a1a1a;
+  --btn-text: #f6f4ec;
+  --btn-hover: #3a3a3a;
+  --card-bg: #efece0;
+  --input-bg: #faf8f1;
+  --font-main: "Special Elite", cursive;
+  --bg-texture: url("/images/grunge-paper.jpg");
+  --overlay: none;
+  --glow: none;
+  --glow-strong: none;
+  --font-masthead: "Old Standard TT", Georgia, serif;
+  --font-headline: "Old Standard TT", Georgia, serif;
+  --font-body: "Source Serif 4", Georgia, serif;
+  --rule: #1a1a1a;
+  --hairline: #b8ad94;
+  --ink-tint: rgba(26, 26, 26, 0.06);
 }
 
 .hidden {
@@ -42,11 +126,11 @@ body::before {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0a0a0a;
+  background: var(--bg);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #33ff33;
+  background: var(--text);
   border-radius: 3px;
 }
 
@@ -66,13 +150,13 @@ header {
   align-items: center;
   margin-bottom: 30px;
   padding-bottom: 15px;
-  border-bottom: 2px solid #1a3d1a;
+  border-bottom: 2px solid var(--border);
 }
 
 header h1 {
   font-size: 1.4rem;
   letter-spacing: 3px;
-  text-shadow: 0 0 10px rgba(51, 255, 51, 0.5);
+  text-shadow: var(--glow);
 }
 
 .back-btn {
@@ -80,8 +164,8 @@ header h1 {
   font-family: inherit;
   font-size: 0.8rem;
   background: transparent;
-  color: #33ff33;
-  border: 1px solid #33ff33;
+  color: var(--text);
+  border: 1px solid var(--text);
   cursor: pointer;
   letter-spacing: 1px;
   text-decoration: none;
@@ -90,7 +174,26 @@ header h1 {
 
 .back-btn:hover {
   background: rgba(51, 255, 51, 0.1);
-  box-shadow: 0 0 10px rgba(51, 255, 51, 0.3);
+  box-shadow: var(--glow);
+}
+
+.header-actions {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+#theme-select {
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  font-family: var(--font-main);
+  padding: 8px;
+}
+
+#theme-select:focus {
+  outline: 1px solid var(--accent);
+  border-color: var(--accent);
 }
 
 /* ==================== TWO-PANEL LAYOUT ==================== */
@@ -104,8 +207,8 @@ header h1 {
 .quest-list-panel {
   width: 280px;
   flex-shrink: 0;
-  background: #111;
-  border: 1px solid #1a3d1a;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   padding: 15px;
   display: flex;
   flex-direction: column;
@@ -116,7 +219,7 @@ header h1 {
   font-size: 0.9rem;
   margin-bottom: 12px;
   letter-spacing: 3px;
-  color: #2db82d;
+  color: var(--accent);
   text-transform: uppercase;
 }
 
@@ -128,8 +231,8 @@ header h1 {
 
 .quest-detail-panel {
   flex: 1;
-  background: #111;
-  border: 1px solid #1a3d1a;
+  background: var(--card-bg);
+  border: 1px solid var(--border);
   padding: 20px;
   overflow-y: auto;
 }
@@ -142,20 +245,20 @@ header h1 {
   gap: 10px;
   padding: 10px 12px;
   margin-bottom: 6px;
-  background: #0a0a0a;
-  border: 1px solid #1a3d1a;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
   cursor: pointer;
   transition: all 0.2s;
 }
 
 .quest-item:hover {
-  border-color: #33ff33;
+  border-color: var(--text);
 }
 
 .quest-item.active {
-  border-color: #33ff33;
+  border-color: var(--text);
   background: rgba(51, 255, 51, 0.1);
-  box-shadow: 0 0 10px rgba(51, 255, 51, 0.2);
+  box-shadow: var(--glow);
 }
 
 .quest-status {
@@ -163,15 +266,15 @@ header h1 {
   width: 16px;
   text-align: center;
   font-size: 0.9rem;
-  color: #33ff33;
+  color: var(--text);
 }
 
 .quest-status.completed {
-  color: #33ff33;
+  color: var(--text);
 }
 
 .quest-status.failed {
-  color: #ff4444;
+  color: var(--danger);
   text-shadow: 0 0 8px rgba(255, 68, 68, 0.5);
 }
 
@@ -189,8 +292,8 @@ header h1 {
   padding: 10px;
   font-family: inherit;
   font-size: 0.85rem;
-  background: #33ff33;
-  color: #0a0a0a;
+  background: var(--btn-bg);
+  color: var(--btn-text);
   border: none;
   cursor: pointer;
   letter-spacing: 1px;
@@ -199,12 +302,12 @@ header h1 {
 }
 
 .new-quest-btn:hover {
-  background: #4af626;
-  box-shadow: 0 0 15px rgba(51, 255, 51, 0.4);
+  background: var(--btn-hover);
+  box-shadow: var(--glow);
 }
 
 .empty-text {
-  color: #1a5c1a;
+  color: var(--text-dim);
   font-size: 0.8rem;
   letter-spacing: 1px;
   text-align: center;
@@ -222,9 +325,9 @@ header h1 {
   padding: 10px 15px;
   font-family: inherit;
   font-size: 1.1rem;
-  background: #0a0a0a;
-  border: 1px solid #1a3d1a;
-  color: #33ff33;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
   outline: none;
   transition: border-color 0.2s;
   letter-spacing: 1px;
@@ -232,11 +335,11 @@ header h1 {
 }
 
 .quest-name-input:focus {
-  border-color: #33ff33;
+  border-color: var(--text);
 }
 
 .quest-name-input::placeholder {
-  color: #1a5c1a;
+  color: var(--text-dim);
 }
 
 .quest-desc-input {
@@ -244,9 +347,9 @@ header h1 {
   padding: 10px 15px;
   font-family: inherit;
   font-size: 0.9rem;
-  background: #0a0a0a;
-  border: 1px solid #1a3d1a;
-  color: #33ff33;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
   outline: none;
   resize: vertical;
   min-height: 60px;
@@ -255,11 +358,11 @@ header h1 {
 }
 
 .quest-desc-input:focus {
-  border-color: #33ff33;
+  border-color: var(--text);
 }
 
 .quest-desc-input::placeholder {
-  color: #1a5c1a;
+  color: var(--text-dim);
 }
 
 .quest-status-row {
@@ -270,7 +373,7 @@ header h1 {
 
 .quest-status-row label {
   font-size: 0.8rem;
-  color: #2db82d;
+  color: var(--accent);
   letter-spacing: 2px;
 }
 
@@ -278,20 +381,20 @@ header h1 {
   padding: 8px 12px;
   font-family: inherit;
   font-size: 0.85rem;
-  background: #0a0a0a;
-  border: 1px solid #1a3d1a;
-  color: #33ff33;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
   cursor: pointer;
   outline: none;
 }
 
 .quest-status-row select:focus {
-  border-color: #33ff33;
+  border-color: var(--text);
 }
 
 .quest-status-row select option {
-  background: #111;
-  color: #33ff33;
+  background: var(--card-bg);
+  color: var(--text);
 }
 
 .delete-quest-btn {
@@ -299,8 +402,8 @@ header h1 {
   font-family: inherit;
   font-size: 0.8rem;
   background: transparent;
-  color: #ff4444;
-  border: 1px solid #ff4444;
+  color: var(--danger);
+  border: 1px solid var(--danger);
   cursor: pointer;
   letter-spacing: 1px;
   transition: all 0.2s;
@@ -308,7 +411,7 @@ header h1 {
 }
 
 .delete-quest-btn:hover {
-  background: rgba(255, 68, 68, 0.1);
+  background: var(--danger-bg);
   box-shadow: 0 0 10px rgba(255, 68, 68, 0.3);
 }
 
@@ -318,7 +421,7 @@ header h1 {
   font-size: 0.9rem;
   margin-bottom: 12px;
   letter-spacing: 3px;
-  color: #2db82d;
+  color: var(--accent);
   text-transform: uppercase;
 }
 
@@ -328,13 +431,13 @@ header h1 {
   gap: 8px;
   padding: 8px 10px;
   margin-bottom: 6px;
-  background: #0a0a0a;
-  border: 1px solid #1a3d1a;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
   transition: all 0.2s;
 }
 
 .stage-row:hover {
-  border-color: #33ff33;
+  border-color: var(--text);
 }
 
 .stage-row.done {
@@ -343,7 +446,7 @@ header h1 {
 
 .stage-row.done .stage-name-input {
   text-decoration: line-through;
-  color: #1a5c1a;
+  color: var(--text-dim);
 }
 
 .stage-end-btn {
@@ -353,8 +456,8 @@ header h1 {
   font-weight: bold;
   letter-spacing: 1px;
   background: transparent;
-  color: #33ff33;
-  border: 1px solid #33ff33;
+  color: var(--text);
+  border: 1px solid var(--text);
   cursor: pointer;
   flex-shrink: 0;
   transition: all 0.2s;
@@ -362,17 +465,17 @@ header h1 {
 
 .stage-end-btn:hover {
   background: rgba(51, 255, 51, 0.15);
-  box-shadow: 0 0 8px rgba(51, 255, 51, 0.3);
+  box-shadow: var(--glow);
 }
 
 .stage-end-btn.ended {
-  color: #1a5c1a;
-  border-color: #1a5c1a;
+  color: var(--text-dim);
+  border-color: var(--text-dim);
 }
 
 .stage-end-btn.ended:hover {
-  color: #33ff33;
-  border-color: #33ff33;
+  color: var(--text);
+  border-color: var(--text);
   background: rgba(51, 255, 51, 0.1);
 }
 
@@ -384,19 +487,19 @@ header h1 {
   font-size: 0.85rem;
   background: transparent;
   border: 1px solid transparent;
-  color: #33ff33;
+  color: var(--text);
   outline: none;
   transition: all 0.2s;
   letter-spacing: 1px;
 }
 
 .stage-name-input:focus {
-  border-color: #33ff33;
-  background: #111;
+  border-color: var(--text);
+  background: var(--card-bg);
 }
 
 .stage-name-input::placeholder {
-  color: #1a5c1a;
+  color: var(--text-dim);
 }
 
 .stage-broadcast {
@@ -410,9 +513,9 @@ header h1 {
   padding: 4px 8px;
   font-family: inherit;
   font-size: 0.75rem;
-  background: #0a0a0a;
-  border: 1px solid #1a3d1a;
-  color: #33ff33;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
   outline: none;
   resize: none;
   min-height: 24px;
@@ -425,19 +528,19 @@ header h1 {
 }
 
 .stage-broadcast-input:focus {
-  border-color: #33ff33;
-  background: #111;
+  border-color: var(--text);
+  background: var(--card-bg);
 }
 
 .stage-broadcast-input::placeholder {
-  color: #1a5c1a;
+  color: var(--text-dim);
 }
 
 .broadcast-preview {
   display: block;
   padding: 4px 8px;
   font-size: 0.75rem;
-  color: #2db82d;
+  color: var(--accent);
   max-width: 300px;
   word-wrap: break-word;
   cursor: pointer;
@@ -446,7 +549,7 @@ header h1 {
 }
 
 .broadcast-preview:hover {
-  border-color: #1a3d1a;
+  border-color: var(--border);
 }
 
 .broadcast-preview.hidden {
@@ -454,7 +557,7 @@ header h1 {
 }
 
 .broadcast-preview.none {
-  color: #1a5c1a;
+  color: var(--text-dim);
   font-style: italic;
 }
 
@@ -463,7 +566,7 @@ header h1 {
   font-family: inherit;
   font-size: 0.75rem;
   background: transparent;
-  color: #ff4444;
+  color: var(--danger);
   border: 1px solid transparent;
   cursor: pointer;
   transition: all 0.2s;
@@ -471,8 +574,8 @@ header h1 {
 }
 
 .stage-delete-btn:hover {
-  border-color: #ff4444;
-  background: rgba(255, 68, 68, 0.1);
+  border-color: var(--danger);
+  background: var(--danger-bg);
 }
 
 .add-stage-btn {
@@ -481,8 +584,8 @@ header h1 {
   font-family: inherit;
   font-size: 0.85rem;
   background: transparent;
-  color: #33ff33;
-  border: 1px solid #33ff33;
+  color: var(--text);
+  border: 1px solid var(--text);
   cursor: pointer;
   letter-spacing: 1px;
   transition: all 0.2s;
@@ -491,7 +594,122 @@ header h1 {
 
 .add-stage-btn:hover {
   background: rgba(51, 255, 51, 0.1);
-  box-shadow: 0 0 10px rgba(51, 255, 51, 0.3);
+  box-shadow: var(--glow);
+}
+
+/* --- Player messages per stage --- */
+
+.stage-player-messages {
+  width: 100%;
+  margin-top: 6px;
+  padding-top: 6px;
+  border-top: 1px solid var(--border);
+}
+
+.player-msg-row {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+}
+
+.player-select {
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+  min-width: 140px;
+}
+
+.player-select:focus {
+  border-color: var(--text);
+}
+
+.player-select option {
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+.player-msg-input {
+  flex: 1;
+  padding: 4px 8px;
+  font-family: inherit;
+  font-size: 0.75rem;
+  background: var(--input-bg);
+  border: 1px solid var(--border);
+  color: var(--text);
+  outline: none;
+  resize: none;
+  min-height: 24px;
+  transition: border-color 0.2s;
+}
+
+.player-msg-input:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.player-msg-input:focus {
+  border-color: var(--text);
+  background: var(--card-bg);
+}
+
+.player-msg-input::placeholder {
+  color: var(--text-dim);
+}
+
+.player-msg-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.player-msg-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 2px 8px;
+  font-size: 0.7rem;
+  background: var(--accent);
+  color: var(--btn-text);
+  cursor: pointer;
+  transition: all 0.2s;
+  letter-spacing: 0.5px;
+}
+
+.player-msg-badge:hover {
+  opacity: 0.8;
+}
+
+.badge-remove {
+  font-weight: bold;
+  margin-left: 2px;
+}
+
+.badge-remove:hover {
+  color: var(--danger);
+}
+
+/* --- Fallback toggle --- */
+
+.fallback-toggle {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.7rem;
+  color: var(--text-dim);
+  cursor: pointer;
+  margin-top: 4px;
+  letter-spacing: 0.5px;
+}
+
+.fallback-checkbox {
+  cursor: pointer;
+  accent-color: var(--accent);
 }
 
 /* ==================== EMPTY STATE ==================== */
@@ -505,7 +723,7 @@ header h1 {
 }
 
 .quest-empty p {
-  color: #1a5c1a;
+  color: var(--text-dim);
   font-size: 0.9rem;
   letter-spacing: 2px;
   text-align: center;
@@ -546,4 +764,271 @@ header h1 {
   .stage-name-input {
     min-width: 80px;
   }
+
+  .player-msg-row {
+    flex-direction: column;
+  }
+
+  .player-select {
+    width: 100%;
+  }
+}
+
+/* ==================== NOIR NEWSPAPER (1950s BROADSHEET) ==================== */
+
+body.theme-noir {
+  font-family: var(--font-body);
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-blend-mode: multiply;
+}
+
+/* --- Masthead --- */
+
+.masthead {
+  display: none;
+}
+
+body.theme-noir .masthead {
+  display: block;
+  text-align: center;
+  padding: 0 0 10px;
+  margin-bottom: 18px;
+  border-bottom: 3px solid var(--rule);
+  position: relative;
+}
+
+body.theme-noir .masthead::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  border-bottom: 1px solid var(--rule);
+}
+
+body.theme-noir .masthead-title {
+  display: block;
+  font-family: var(--font-masthead);
+  font-weight: 700;
+  font-size: clamp(1.9rem, 5vw, 2.7rem);
+  line-height: 1.05;
+  color: var(--text);
+  letter-spacing: 0.02em;
+  text-shadow: none;
+}
+
+body.theme-noir .masthead-date {
+  display: block;
+  margin-top: 6px;
+  font-family: var(--font-main);
+  font-size: 0.8rem;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--text-dim);
+}
+
+body.theme-noir header h1 {
+  display: none;
+}
+
+body.theme-noir header {
+  border-bottom-color: var(--hairline);
+}
+
+/* --- Headlines --- */
+
+body.theme-noir .quest-list-panel h2,
+body.theme-noir .stages-section h2 {
+  font-family: var(--font-headline);
+  font-size: 1.3rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  text-transform: none;
+  color: var(--text);
+  padding-bottom: 8px;
+  margin-bottom: 14px;
+  border-bottom: 3px solid var(--rule);
+  position: relative;
+}
+
+body.theme-noir .quest-list-panel h2::after,
+body.theme-noir .stages-section h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: -4px;
+  border-bottom: 1px solid var(--rule);
+}
+
+/* --- Panels: no boxes, hairline columns --- */
+
+body.theme-noir .quest-list-panel,
+body.theme-noir .quest-detail-panel {
+  background: transparent;
+  border-radius: 0;
+}
+
+body.theme-noir .quest-list-panel {
+  border: none;
+  border-right: 1px solid var(--hairline);
+  padding-right: 20px;
+}
+
+body.theme-noir .quest-detail-panel {
+  border: none;
+  padding-left: 20px;
+}
+
+/* --- Quest items: article rows --- */
+
+body.theme-noir .quest-item {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  padding: 10px 6px;
+}
+
+body.theme-noir .quest-item:hover {
+  border-bottom-color: var(--text);
+  background: var(--ink-tint);
+}
+
+body.theme-noir .quest-item.active {
+  border-bottom: 2px solid var(--rule);
+  background: var(--ink-tint);
+  box-shadow: none;
+}
+
+/* --- Forms --- */
+
+body.theme-noir input[type="text"],
+body.theme-noir input[type="number"],
+body.theme-noir input[type="password"],
+body.theme-noir textarea,
+body.theme-noir select {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--text);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+body.theme-noir input:focus,
+body.theme-noir textarea:focus,
+body.theme-noir select:focus {
+  outline: none;
+  border-bottom: 2px solid var(--text);
+  box-shadow: none;
+}
+
+body.theme-noir input::placeholder,
+body.theme-noir textarea::placeholder {
+  color: var(--text-dim);
+  opacity: 1;
+}
+
+body.theme-noir select option {
+  background: var(--bg);
+  color: var(--text);
+}
+
+/* Quest name = headline field */
+body.theme-noir .quest-name-input {
+  font-family: var(--font-headline);
+  font-size: 1.6rem;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  margin-bottom: 12px;
+}
+
+body.theme-noir .quest-status-row label {
+  font-family: var(--font-main);
+  letter-spacing: 1px;
+}
+
+/* --- Buttons --- */
+
+body.theme-noir button {
+  border-radius: 0;
+  box-shadow: none;
+  text-shadow: none;
+}
+
+body.theme-noir button:hover {
+  box-shadow: none;
+}
+
+body.theme-noir .back-btn:hover,
+body.theme-noir .add-stage-btn:hover,
+body.theme-noir .stage-end-btn:hover {
+  background: var(--ink-tint);
+}
+
+body.theme-noir .back-btn {
+  font-family: var(--font-main);
+}
+
+/* --- Stages: article steps --- */
+
+body.theme-noir .stage-row {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+}
+
+body.theme-noir .stage-row:hover {
+  border-bottom-color: var(--text);
+  background: var(--ink-tint);
+}
+
+body.theme-noir .stage-row.done {
+  opacity: 0.55;
+}
+
+body.theme-noir .stage-broadcast-input,
+body.theme-noir .stage-name-input {
+  background: transparent;
+}
+
+body.theme-noir .stage-name-input:focus,
+body.theme-noir .stage-broadcast-input:focus {
+  background: var(--input-bg);
+  border-color: var(--text);
+}
+
+body.theme-noir .broadcast-preview {
+  color: var(--text-dim);
+}
+
+body.theme-noir .stage-player-messages {
+  border-top-color: var(--hairline);
+}
+
+body.theme-noir .player-select,
+body.theme-noir .player-msg-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid var(--text);
+  border-radius: 0;
+}
+
+body.theme-noir .player-select:focus,
+body.theme-noir .player-msg-input:focus {
+  border-bottom: 2px solid var(--text);
+}
+
+body.theme-noir .player-msg-badge {
+  background: var(--accent);
+  color: var(--bg);
+  border-radius: 0;
+}
+
+body.theme-noir .quest-empty p {
+  letter-spacing: 1px;
 }

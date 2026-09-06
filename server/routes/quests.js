@@ -1,6 +1,6 @@
 const express = require("express");
 const router = express.Router();
-const { questQueries, questStageQueries, createMessage } = require("../db");
+const { questQueries, questStageQueries, questStagePlayerMessageQueries, playerQueries, createMessage } = require("../db");
 const { MAX_MESSAGE_LENGTH } = require("../../config/config");
 
 function sanitize(str) {
@@ -128,6 +128,13 @@ router.put("/:id/stages/:stageId", (req, res) => {
   }
   const sortOrder = typeof req.body.sort_order === "number" ? req.body.sort_order : stage.sort_order;
 
+  let fallbackEnabled = stage.fallback_enabled;
+  if (typeof req.body.fallback_enabled === "number") {
+    fallbackEnabled = req.body.fallback_enabled ? 1 : 0;
+  } else if (typeof req.body.fallback_enabled === "boolean") {
+    fallbackEnabled = req.body.fallback_enabled ? 1 : 0;
+  }
+
   let isDone = stage.is_done;
   let doneAt = stage.done_at;
 
@@ -140,34 +147,53 @@ router.put("/:id/stages/:stageId", (req, res) => {
     }
   }
 
-  questStageQueries.update.run(name, broadcastText, isDone, doneAt, sortOrder, stageId);
+  questStageQueries.update.run(name, broadcastText, fallbackEnabled, isDone, doneAt, sortOrder, stageId);
   const updated = questStageQueries.getById.get(stageId);
 
-  // Broadcast immediately when a stage with broadcast_text is marked done
-  if (isDone === 1 && updated.broadcast_text) {
+  // Broadcast immediately when a stage is marked done
+  if (isDone === 1) {
     const io = req.app.locals.io;
     const db = req.app.locals.db;
 
-    const result = createMessage(db, {
-      targetType: "broadcast",
-      targetPlayerId: null,
-      body: updated.broadcast_text,
-      source: "auto",
+    const players = playerQueries.getAll.all();
+    const playerMessages = questStagePlayerMessageQueries.getByStage.all(stageId);
+    const messageMap = {};
+    playerMessages.forEach(function(pm) {
+      messageMap[pm.player_id] = pm.message_text;
     });
 
-    const message = {
-      id: result.lastInsertRowid,
-      target_type: "broadcast",
-      target_player_id: null,
-      body: updated.broadcast_text,
-      source: "auto",
-      created_at: new Date().toISOString(),
-    };
+    const broadcastBody = updated.broadcast_text;
+    const fallbackEnabled = updated.fallback_enabled;
+    let anySent = false;
 
-    io.emit("message:new", message);
-    io.to("admin").emit("message:new", message);
+    players.forEach(function(player) {
+      const body = messageMap[player.id] || (fallbackEnabled ? broadcastBody : null);
+      if (!body) return;
 
-    updated._broadcastSent = true;
+      const result = createMessage(db, {
+        targetType: "player",
+        targetPlayerId: player.id,
+        body: body,
+        source: "auto",
+      });
+
+      const message = {
+        id: result.lastInsertRowid,
+        target_type: "player",
+        target_player_id: player.id,
+        body: body,
+        source: "auto",
+        created_at: new Date().toISOString(),
+      };
+
+      io.to("player:" + player.id).emit("message:new", message);
+      io.to("admin").emit("message:new", message);
+      anySent = true;
+    });
+
+    if (anySent) {
+      updated._broadcastSent = true;
+    }
   }
 
   res.json(updated);
@@ -220,6 +246,83 @@ router.put("/:id/stages/reorder", (req, res) => {
 
   const stages = questStageQueries.getByQuest.all(id);
   res.json(stages);
+});
+
+// GET /api/quests/:id/stages/:stageId/messages - list player messages for a stage
+router.get("/:id/stages/:stageId/messages", (req, res) => {
+  const { id, stageId } = req.params;
+  const quest = questQueries.getById.get(id);
+  if (!quest) {
+    return res.status(404).json({ error: "Quest not found" });
+  }
+
+  const stage = questStageQueries.getById.get(stageId);
+  if (!stage || stage.quest_id !== parseInt(id)) {
+    return res.status(404).json({ error: "Stage not found" });
+  }
+
+  const messages = questStagePlayerMessageQueries.getByStage.all(stageId);
+  res.json(messages);
+});
+
+// PUT /api/quests/:id/stages/:stageId/messages - upsert a player message
+router.put("/:id/stages/:stageId/messages", (req, res) => {
+  const { id, stageId } = req.params;
+  const quest = questQueries.getById.get(id);
+  if (!quest) {
+    return res.status(404).json({ error: "Quest not found" });
+  }
+
+  const stage = questStageQueries.getById.get(stageId);
+  if (!stage || stage.quest_id !== parseInt(id)) {
+    return res.status(404).json({ error: "Stage not found" });
+  }
+
+  const { player_id, message_text } = req.body;
+  if (!player_id) {
+    return res.status(400).json({ error: "player_id is required" });
+  }
+
+  const player = playerQueries.getById.get(player_id);
+  if (!player) {
+    return res.status(404).json({ error: "Player not found" });
+  }
+
+  const cleanText = sanitize(message_text) || null;
+
+  // If message_text is empty/null, delete the row (no custom message)
+  if (!cleanText) {
+    const existing = questStagePlayerMessageQueries.getByStageAndPlayer.get(stageId, player_id);
+    if (existing) {
+      questStagePlayerMessageQueries.delete.run(existing.id);
+    }
+    return res.json({ deleted: true });
+  }
+
+  if (cleanText.length > MAX_MESSAGE_LENGTH) {
+    return res.status(400).json({ error: `Message too long (max ${MAX_MESSAGE_LENGTH} characters)` });
+  }
+
+  questStagePlayerMessageQueries.upsert.run(stageId, player_id, cleanText);
+  const updated = questStagePlayerMessageQueries.getByStageAndPlayer.get(stageId, player_id);
+  res.json(updated);
+});
+
+// DELETE /api/quests/:id/stages/:stageId/messages/:messageId - delete a player message
+router.delete("/:id/stages/:stageId/messages/:messageId", (req, res) => {
+  const { id, stageId, messageId } = req.params;
+  const quest = questQueries.getById.get(id);
+  if (!quest) {
+    return res.status(404).json({ error: "Quest not found" });
+  }
+
+  const stage = questStageQueries.getById.get(stageId);
+  if (!stage || stage.quest_id !== parseInt(id)) {
+    return res.status(404).json({ error: "Stage not found" });
+  }
+
+  questStagePlayerMessageQueries.delete.run(messageId);
+  res.json({ ok: true });
 });
 
 module.exports = router;

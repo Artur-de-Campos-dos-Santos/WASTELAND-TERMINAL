@@ -3,3 +3,6 @@ data/session.sqlite
 data/backup/
 .env
 .DS_Store
+.superpowers/
+skill-observations/
+public/radio/music/

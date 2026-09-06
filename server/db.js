@@ -57,11 +57,28 @@ function initDatabase() {
       quest_id INTEGER NOT NULL,
       name TEXT NOT NULL,
       broadcast_text TEXT,
+      fallback_enabled INTEGER NOT NULL DEFAULT 1,
       sort_order INTEGER NOT NULL DEFAULT 0,
       is_done INTEGER NOT NULL DEFAULT 0,
       done_at DATETIME,
       created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
       FOREIGN KEY (quest_id) REFERENCES quest(id) ON DELETE CASCADE
+    );
+
+    CREATE TABLE IF NOT EXISTS config (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL
+    );
+
+    CREATE TABLE IF NOT EXISTS quest_stage_player_message (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      stage_id INTEGER NOT NULL,
+      player_id TEXT NOT NULL,
+      message_text TEXT,
+      created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (stage_id) REFERENCES quest_stage(id) ON DELETE CASCADE,
+      FOREIGN KEY (player_id) REFERENCES player(id) ON DELETE CASCADE,
+      UNIQUE(stage_id, player_id)
     );
   `);
 
@@ -69,6 +86,19 @@ function initDatabase() {
   const session = db.prepare("SELECT id FROM session LIMIT 1").get();
   if (!session) {
     db.prepare("INSERT INTO session (created_at) VALUES (CURRENT_TIMESTAMP)").run();
+  }
+
+  // Migrations for existing databases
+  try {
+    db.exec("ALTER TABLE quest_stage ADD COLUMN fallback_enabled INTEGER NOT NULL DEFAULT 1");
+  } catch (e) {
+    // Column already exists, ignore
+  }
+
+  // Set default theme
+  const existingTheme = db.prepare("SELECT value FROM config WHERE key = ?").get("theme");
+  if (!existingTheme) {
+    db.prepare("INSERT INTO config (key, value) VALUES (?, ?)").run("theme", "pipboy");
   }
 
   return db;
@@ -117,6 +147,23 @@ const questStageQueries = {
   reorder: null,
 };
 
+// --- Quest Stage Player Message queries ---
+
+const questStagePlayerMessageQueries = {
+  getByStage: null,
+  getByStageAndPlayer: null,
+  upsert: null,
+  delete: null,
+  deleteByStage: null,
+};
+
+// --- Config queries ---
+
+const configQueries = {
+  get: null,
+  set: null,
+};
+
 function prepareQueries(db) {
   playerQueries.create = db.prepare(
     "INSERT INTO player (id, display_name, pin) VALUES (?, ?, ?)"
@@ -162,7 +209,7 @@ function prepareQueries(db) {
   );
   questStageQueries.getById = db.prepare("SELECT * FROM quest_stage WHERE id = ?");
   questStageQueries.update = db.prepare(
-    "UPDATE quest_stage SET name = ?, broadcast_text = ?, is_done = ?, done_at = ?, sort_order = ? WHERE id = ?"
+    "UPDATE quest_stage SET name = ?, broadcast_text = ?, fallback_enabled = ?, is_done = ?, done_at = ?, sort_order = ? WHERE id = ?"
   );
   questStageQueries.delete = db.prepare("DELETE FROM quest_stage WHERE id = ?");
   questStageQueries.getMaxSortOrder = db.prepare(
@@ -173,6 +220,29 @@ function prepareQueries(db) {
   );
   questStageQueries.reorder = db.prepare(
     "UPDATE quest_stage SET sort_order = ? WHERE id = ?"
+  );
+
+  // Quest Stage Player Message queries
+  questStagePlayerMessageQueries.getByStage = db.prepare(
+    "SELECT * FROM quest_stage_player_message WHERE stage_id = ? ORDER BY created_at"
+  );
+  questStagePlayerMessageQueries.getByStageAndPlayer = db.prepare(
+    "SELECT * FROM quest_stage_player_message WHERE stage_id = ? AND player_id = ?"
+  );
+  questStagePlayerMessageQueries.upsert = db.prepare(
+    "INSERT INTO quest_stage_player_message (stage_id, player_id, message_text) VALUES (?, ?, ?) ON CONFLICT(stage_id, player_id) DO UPDATE SET message_text = excluded.message_text"
+  );
+  questStagePlayerMessageQueries.delete = db.prepare(
+    "DELETE FROM quest_stage_player_message WHERE id = ?"
+  );
+  questStagePlayerMessageQueries.deleteByStage = db.prepare(
+    "DELETE FROM quest_stage_player_message WHERE stage_id = ?"
+  );
+
+  // Config queries
+  configQueries.get = db.prepare("SELECT value FROM config WHERE key = ?");
+  configQueries.set = db.prepare(
+    "INSERT OR REPLACE INTO config (key, value) VALUES (?, ?)"
   );
 }
 
@@ -188,4 +258,6 @@ module.exports = {
   messageQueries,
   questQueries,
   questStageQueries,
+  configQueries,
+  questStagePlayerMessageQueries,
 };

@@ -5,6 +5,7 @@ const path = require("path");
 const os = require("os");
 const { initDatabase, prepareQueries } = require("./db");
 const { PORT } = require("../config/config");
+const { RadioStateMachine } = require("./radio");
 
 // Initialize database
 const db = initDatabase();
@@ -29,6 +30,7 @@ app.use("/api", require("./routes/auth"));
 app.use("/api", require("./routes/session"));
 app.use("/api/export", require("./routes/export"));
 app.use("/api/quests", require("./routes/quests"));
+app.use("/api/config", require("./routes/config"));
 
 // Serve pages
 app.get("/player/:id", (req, res) => {
@@ -43,8 +45,17 @@ app.get("/dm/quests", (req, res) => {
   res.sendFile(path.join(__dirname, "..", "public", "dm", "quests.html"));
 });
 
+app.get("/radio", (req, res) => {
+  res.sendFile(path.join(__dirname, "..", "public", "radio", "index.html"));
+});
+
 // Socket.IO
-require("./sockets")(io, db);
+const socketSetup = require("./sockets");
+socketSetup(io, db);
+
+// Start radio
+const radio = new RadioStateMachine(io);
+socketSetup.setRadioInstance(radio);
 
 // Get local IP
 function getLocalIP() {
@@ -64,6 +75,7 @@ server.listen(PORT, "0.0.0.0", () => {
   console.log(`\n=== WASTELAND TERMINAL ===`);
   console.log(`Server running on http://${ip}:${PORT}`);
   console.log(`\nDM Dashboard: http://${ip}:${PORT}/dm`);
+  console.log(`\nRadio: http://${ip}:${PORT}/radio`);
   console.log(`\nShare player URLs from the dashboard once players are added.`);
   console.log(`=========================\n`);
 });

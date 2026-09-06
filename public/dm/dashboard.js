@@ -18,6 +18,7 @@ const clearLogBtn = document.getElementById("btn-clear-log");
 const godView = document.getElementById("god-view");
 const presetsGrid = document.getElementById("presets-grid");
 const presetForm = document.getElementById("preset-form");
+let currentTheme = "pipboy";
 
 const socket = io();
 
@@ -339,6 +340,16 @@ async function init() {
     authenticated = true;
     showDashboard();
   }
+
+  // Load current theme
+  fetch("/api/config/theme")
+    .then(r => r.json())
+    .then(data => {
+      currentTheme = data.theme;
+      document.body.className = "theme-" + currentTheme;
+      const sel = document.getElementById("theme-select");
+      if (sel) sel.value = currentTheme;
+    });
 }
 
 pinSubmit.addEventListener("click", submitPin);
@@ -569,10 +580,24 @@ function appendGodView(msg) {
       ? "BROADCAST"
       : `→ ${msg.target_player_id}`;
 
-  div.innerHTML = `<span class="target">[${target}]</span> [${time}] ${msg.body}`;
+  div.innerHTML = `<span class="target">[${target}]</span> <span class="msg-time">[${time}]</span> ${msg.body}`;
   godView.appendChild(div);
   godView.scrollTop = godView.scrollHeight;
 }
+
+function setMastheadDate() {
+  const el = document.querySelector(".masthead-date");
+  if (!el) return;
+  const dateStr = new Date().toLocaleDateString("pt-BR", {
+    weekday: "long",
+    day: "2-digit",
+    month: "long",
+    year: "numeric",
+  });
+  el.textContent = `${dateStr} — EDIÇÃO DA MANHÃ`;
+}
+
+setMastheadDate();
 
 // ==================== EXPORT ====================
 
@@ -611,3 +636,23 @@ document.getElementById("btn-quest-journal").addEventListener("click", () => {
 });
 
 init();
+
+// ==================== THEMES ====================
+
+// Theme switcher
+document.getElementById("theme-select").addEventListener("change", (e) => {
+  const theme = e.target.value;
+  fetch("/api/config/theme", {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ theme })
+  });
+});
+
+// Listen for theme changes from server
+socket.on("theme:changed", (data) => {
+  currentTheme = data.theme;
+  document.body.className = "theme-" + currentTheme;
+  const sel = document.getElementById("theme-select");
+  if (sel) sel.value = currentTheme;
+});
