@@ -317,6 +317,20 @@ function renderStages() {
   });
 }
 
+function syncBroadcastPreview(stageRow, text) {
+  var preview = stageRow.querySelector(".broadcast-preview");
+  if (!preview) return;
+  if (text) {
+    var shown = escapeHtml(text.substring(0, 40));
+    if (text.length > 40) shown += "...";
+    preview.innerHTML = shown;
+    preview.classList.remove("none");
+  } else {
+    preview.textContent = "(nenhum)";
+    preview.classList.add("none");
+  }
+}
+
 function attachStageListeners() {
   var questId = selectedQuestId;
 
@@ -345,13 +359,18 @@ function attachStageListeners() {
     textarea.addEventListener("input", function(e) {
       clearTimeout(debounce);
       debounce = setTimeout(function() {
-        var stageId = parseInt(e.target.closest(".stage-row").dataset.id);
-        updateStage(questId, stageId, { broadcast_text: e.target.value });
+        var stageRow = e.target.closest(".stage-row");
+        var stageId = parseInt(stageRow.dataset.id);
+        updateStage(questId, stageId, { broadcast_text: e.target.value }).then(function() {
+          syncBroadcastPreview(stageRow, e.target.value);
+        });
       }, 500);
     });
     textarea.addEventListener("blur", function(e) {
+      var stageRow = e.target.closest(".stage-row");
       var container = e.target.closest(".stage-broadcast");
       var preview = container.querySelector(".broadcast-preview");
+      syncBroadcastPreview(stageRow, e.target.value);
       e.target.classList.remove("visible");
       preview.classList.remove("hidden");
     });

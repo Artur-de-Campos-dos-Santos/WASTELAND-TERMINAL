@@ -4,24 +4,24 @@ const fs = require("fs");
 const RADIO_DIR = path.join(__dirname, "..", "public", "radio");
 
 const SONG_FILES = [
-  "Blind Willie McTell - I Got the Cross the River Jordan.flac",
-  "Champion Jack Dupree - Junker's Blues.flac",
-  "Johnny Shines - Travelling Back Home.flac",
-  "Robert Johnson - Come On In My Kitchen.flac",
-  "Furry Lewis - Judge Harsh Blues.flac",
-  "Rev. Gary Davis - Samson And Delilah.flac",
-  "John Lee Hooker - Boom Boom.flac",
-  "Lightnin' Hopkins - What'd I Say_.flac",
-  "John Lee Hooker - Boogie Chillen'.flac",
-  "B.B. King - The Thrill Is Gone.flac",
-  "Robert Johnson - Hell Hound On My Trail.flac",
-  "Big Joe Williams - Baby Please Don't Go.flac",
-  "Bobby Day - Rockin' Robin.flac",
-  "Lightnin' Hopkins - Mojo Hand.flac",
-  "Robert Petway - Catfish Blues.flac",
-  "Louis Armstrong - St. James Infirmary (Gambler's Blues).flac",
-  "Lee Dorsey - Working in the Coal Mine.flac",
-  "Louis Armstrong - A Kiss to Build a Dream On.flac",
+  "Blind Willie McTell - I Got the Cross the River Jordan.m4a",
+  "Champion Jack Dupree - Junker's Blues.m4a",
+  "Johnny Shines - Travelling Back Home.m4a",
+  "Robert Johnson - Come On In My Kitchen.m4a",
+  "Furry Lewis - Judge Harsh Blues.m4a",
+  "Rev. Gary Davis - Samson And Delilah.m4a",
+  "John Lee Hooker - Boom Boom.m4a",
+  "Lightnin' Hopkins - What'd I Say_.m4a",
+  "John Lee Hooker - Boogie Chillen'.m4a",
+  "B.B. King - The Thrill Is Gone.m4a",
+  "Robert Johnson - Hell Hound On My Trail.m4a",
+  "Big Joe Williams - Baby Please Don't Go.m4a",
+  "Bobby Day - Rockin' Robin.m4a",
+  "Lightnin' Hopkins - Mojo Hand.m4a",
+  "Robert Petway - Catfish Blues.m4a",
+  "Louis Armstrong - St. James Infirmary (Gambler's Blues).m4a",
+  "Lee Dorsey - Working in the Coal Mine.m4a",
+  "Louis Armstrong - A Kiss to Build a Dream On.m4a",
 ];
 
 const FLAVOR_FILES = [
@@ -153,7 +153,7 @@ class RadioStateMachine {
 
     const songIndex = this.pickSong();
     const songFile = SONG_FILES[songIndex];
-    const title = songFile.replace(".flac", "");
+    const title = songFile.replace(/\.[^.]+$/, "");
     const filePath = `/radio/music/${encodeURIComponent(songFile)}`;
 
     this._pendingSong = {
